@@ -1,0 +1,73 @@
+services:
+
+  postgres:
+    image: postgres:18
+    container_name: gekel-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: gekel
+      POSTGRES_USER: gekel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+       - postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gekel -d gekel"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:8
+    container_name: gekel-redis
+    restart: unless-stopped
+
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+
+    container_name: gekel-api
+    restart: unless-stopped
+
+    env_file:
+      - ./apps/api/.env
+
+    environment:
+      DATABASE_URL: postgres://gekel:${POSTGRES_PASSWORD}@postgres:5432/gekel?sslmode=disable
+      REDIS_URL: redis://redis:6379
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

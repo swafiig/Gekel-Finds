@@ -1,0 +1,18 @@
+{
+  "name": "gekel-finds",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gekel Finds - Your plug to Nairobi wholesale",
+  "packageManager": "pnpm@10",
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "build": "pnpm recursive build",
+    "lint": "pnpm recursive lint",
+    "typecheck": "pnpm recursive typecheck",
+    "test": "pnpm recursive test",
+    "format": "pnpm recursive format"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
