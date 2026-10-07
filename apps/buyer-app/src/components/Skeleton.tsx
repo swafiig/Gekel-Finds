@@ -1,0 +1,17 @@
+import React, { useEffect, useRef } from 'react';
+import { Animated, DimensionValue, ViewStyle } from 'react-native';
+
+export default function Skeleton({ width = '100%', height = 16, radius = 8, style }: { width?: DimensionValue; height?: number; radius?: number; style?: ViewStyle }) {
+  const o = useRef(new Animated.Value(0.4)).current;
+  useEffect(() => {
+    const a = Animated.loop(
+      Animated.sequence([
+        Animated.timing(o, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(o, { toValue: 0.4, duration: 700, useNativeDriver: true }),
+      ]),
+    );
+    a.start();
+    return () => a.stop();
+  }, [o]);
+  return <Animated.View style={[{ width, height, borderRadius: radius, backgroundColor: '#EDE7DF', opacity: o }, style]} />;
+}
