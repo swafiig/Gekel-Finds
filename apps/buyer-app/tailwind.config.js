@@ -6,13 +6,13 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: '#FFF4EC',
-          100: '#FFE5D1',
-          200: '#FFC9A3',
-          400: '#F47B3A',
-          500: '#E8590C',
-          600: '#D14A06',
-          700: '#B53F05',
+          50: '#FFF1EF',
+          100: '#FFDDD8',
+          200: '#FFB9AF',
+          400: '#F8695D',
+          500: '#F44236',
+          600: '#DC3228',
+          700: '#B82419',
         },
         cream: '#F9F7F3',
         ink: { DEFAULT: '#1C1917', soft: '#57534E', mute: '#A8A29E' },

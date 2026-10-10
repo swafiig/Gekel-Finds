@@ -1,24 +1,23 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '../../components/Logo';
 import Button from '../../components/Button';
 import { useNav } from '../../hooks/useNav';
-import { BRAND_GRADIENT } from '../SplashScreen';
+import { LOGO_BG } from '../../theme';
 
 export default function WelcomeScreen() {
   const nav = useNav();
   return (
-    <LinearGradient colors={BRAND_GRADIENT} start={{ x: 0.1, y: 0 }} end={{ x: 0.9, y: 1 }} style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: LOGO_BG }}>
       <StatusBar style="light" />
       <SafeAreaView className="flex-1">
         <View className="flex-1 items-center justify-center">
-          <Logo size={92} withWord />
-          <View className="mt-10 items-center">
+          <Logo size={260} rounded={false} />
+          <View className="mt-6 items-center">
             {['YOU ASK.', 'WE FIND.', 'WE PACK.', 'WE DELIVER.'].map((l) => (
-              <Text key={l} style={{ letterSpacing: 5, color: '#FFD9BF' }} className="mb-2 text-sm font-bold">{l}</Text>
+              <Text key={l} style={{ letterSpacing: 5, color: '#FFE3DF' }} className="mb-2 text-sm font-bold">{l}</Text>
             ))}
           </View>
         </View>
@@ -28,6 +27,6 @@ export default function WelcomeScreen() {
           <View className="mt-5 h-1 w-32 self-center rounded-full bg-white/60" />
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }

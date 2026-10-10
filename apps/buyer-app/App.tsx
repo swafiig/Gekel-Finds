@@ -5,11 +5,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { AuthProvider } from './src/context/AuthContext';
 import { AppDataProvider } from './src/context/AppDataContext';
+import { UIProvider } from './src/context/UIContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
 const theme = {
   ...DefaultTheme,
-  colors: { ...DefaultTheme.colors, background: '#F9F7F3', primary: '#E8590C' },
+  colors: { ...DefaultTheme.colors, background: '#F9F7F3', primary: '#F44236' },
 };
 
 export default function App() {
@@ -17,10 +18,12 @@ export default function App() {
     <SafeAreaProvider>
       <AuthProvider>
         <AppDataProvider>
-          <NavigationContainer theme={theme}>
-            <StatusBar style="dark" />
-            <RootNavigator />
-          </NavigationContainer>
+          <UIProvider>
+            <NavigationContainer theme={theme}>
+              <StatusBar style="dark" />
+              <RootNavigator />
+            </NavigationContainer>
+          </UIProvider>
         </AppDataProvider>
       </AuthProvider>
     </SafeAreaProvider>

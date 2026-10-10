@@ -3,8 +3,7 @@ import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Screen from '../../components/Screen';
-import BackHeader from '../../components/BackHeader';
+import AuthLayout from '../../components/AuthLayout';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import FormError from '../../components/FormError';
@@ -34,17 +33,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <Screen scroll>
-      <BackHeader />
-      <View className="mt-4 items-start">
-        <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-brand-100">
-          <Ionicons name="key" size={28} color="#E8590C" />
-        </View>
-        <Text className="text-[32px] font-extrabold text-ink">Forgot password?</Text>
-        <Text className="mb-8 mt-2 text-base text-ink-soft">
-          Enter the phone number or email you signed up with. We will send you a 6-digit code.
-        </Text>
-      </View>
+    <AuthLayout title="Forgot password?" subtitle="Enter the phone number or email you signed up with. We will send you a 6-digit code.">
 
       <FormError message={formError} />
       <Input
@@ -61,6 +50,6 @@ export default function ForgotPasswordScreen() {
       />
       <Button title="Send code" onPress={submit} loading={loading} className="mt-2" />
       <Button title="Back to log in" variant="ghost" className="mt-2" onPress={() => nav.goBack()} />
-    </Screen>
+    </AuthLayout>
   );
 }

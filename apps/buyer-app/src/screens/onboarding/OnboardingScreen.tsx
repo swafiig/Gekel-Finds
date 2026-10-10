@@ -13,7 +13,7 @@ function FloatChip({ label, icon, dot, style }: { label: string; icon?: Icon; do
   return (
     <View style={style} className="absolute flex-row items-center rounded-full bg-white px-2.5 py-1.5 shadow-sm">
       {dot && <View style={{ backgroundColor: dot }} className="mr-1.5 h-2 w-2 rounded-full" />}
-      {icon && <Ionicons name={icon} size={11} color="#E8590C" style={{ marginRight: 4 }} />}
+      {icon && <Ionicons name={icon} size={11} color="#F44236" style={{ marginRight: 4 }} />}
       <Text className="text-[9px] font-extrabold tracking-wide text-ink">{label}</Text>
     </View>
   );
@@ -85,7 +85,7 @@ function PageDeliver() {
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 8 }}>
       <IllustrationCard height={220}>
         <DeliveryIllustration height={200} />
-        <FloatChip label="NO MARKUP" dot="#E8590C" style={{ left: 12, top: 28 }} />
+        <FloatChip label="NO MARKUP" dot="#F44236" style={{ left: 12, top: 28 }} />
         <FloatChip label="DIRECT TILL" dot="#16A34A" style={{ right: 12, top: 12 }} />
       </IllustrationCard>
       <Text className="mt-6 text-[24px] font-extrabold leading-7 text-ink">Fast doorstep delivery.{'\n'}Pay supplier directly.</Text>
@@ -93,7 +93,7 @@ function PageDeliver() {
         Track your rider live to your doorstep. You pay the supplier's Till directly with zero markup. GEKEL only charges a small delivery fee.
       </Text>
       <View className="mt-4 flex-row items-start rounded-2xl bg-brand-50 p-3">
-        <Ionicons name="phone-portrait" size={20} color="#E8590C" style={{ marginTop: 2 }} />
+        <Ionicons name="phone-portrait" size={20} color="#F44236" style={{ marginTop: 2 }} />
         <Text className="ml-3 flex-1 text-sm leading-5 text-ink">
           <Text className="font-bold">Verified M-Pesa push: </Text>You confirm goods before release.
         </Text>
@@ -173,7 +173,7 @@ export default function OnboardingScreen() {
               key={i}
               style={{
                 width: scrollX.interpolate({ inputRange: range, outputRange: [8, 8, 8], extrapolate: 'clamp' }),
-                backgroundColor: scrollX.interpolate({ inputRange: range, outputRange: ['#D6D3D1', '#E8590C', '#D6D3D1'], extrapolate: 'clamp' }),
+                backgroundColor: scrollX.interpolate({ inputRange: range, outputRange: ['#D6D3D1', '#F44236', '#D6D3D1'], extrapolate: 'clamp' }),
               }}
               className="mx-1 h-2 rounded-full"
             />

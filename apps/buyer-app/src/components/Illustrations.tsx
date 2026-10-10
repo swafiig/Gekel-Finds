@@ -4,8 +4,8 @@ import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg';
 const SKIN = '#8A5636';
 const SKIN_DARK = '#6B4026';
 const HAIR = '#1B120E';
-const ORANGE = '#E8590C';
-const ORANGE_DARK = '#B53F05';
+const ORANGE = '#F44236';
+const ORANGE_DARK = '#B52419';
 const GREEN = '#1F8A5B';
 const INK = '#2A2321';
 
@@ -31,7 +31,7 @@ export function AskIllustration({ height = 300 }: { height?: number }) {
       ))}
       {/* neck + body */}
       <Rect x="136" y="170" width="28" height="40" rx="8" fill={SKIN_DARK} />
-      <Path d="M58 300 C58 238 92 208 150 208 C208 208 242 238 242 300 Z" fill="#D9500C" />
+      <Path d="M58 300 C58 238 92 208 150 208 C208 208 242 238 242 300 Z" fill="#E23A2E" />
       {/* face */}
       <Ellipse cx="150" cy="140" rx="40" ry="46" fill={SKIN} />
       {/* fringe curls */}
@@ -50,11 +50,11 @@ export function AskIllustration({ height = 300 }: { height?: number }) {
       <Path d="M92 226 L150 244 L150 300 L92 282 Z" fill="#D08A4D" />
       <Path d="M150 244 L208 226 L208 282 L150 300 Z" fill="#B87238" />
       <Rect x="104" y="262" width="26" height="28" rx="3" fill="#fff" transform="rotate(8 117 276)" />
-      <Line x1="109" y1="270" x2="124" y2="272" stroke="#E8590C" strokeWidth={3} />
+      <Line x1="109" y1="270" x2="124" y2="272" stroke="#F44236" strokeWidth={3} />
       <Line x1="109" y1="278" x2="124" y2="280" stroke="#C9C3BA" strokeWidth={2} />
       {/* arms + hands */}
-      <Path d="M60 280 C56 242 80 226 98 236 L108 290 Z" fill="#E8590C" />
-      <Path d="M240 280 C244 242 220 226 202 236 L192 290 Z" fill="#D9500C" />
+      <Path d="M60 280 C56 242 80 226 98 236 L108 290 Z" fill="#F44236" />
+      <Path d="M240 280 C244 242 220 226 202 236 L192 290 Z" fill="#E23A2E" />
       <Circle cx="102" cy="244" r="9" fill={SKIN} />
       <Circle cx="198" cy="244" r="9" fill={SKIN} />
       {/* phone */}
@@ -64,7 +64,7 @@ export function AskIllustration({ height = 300 }: { height?: number }) {
         <Rect x="224" y="170" width="24" height="7" rx="3" fill={ORANGE} />
         <Rect x="224" y="182" width="24" height="4" rx="2" fill="#D9D3CA" />
         <Rect x="224" y="190" width="18" height="4" rx="2" fill="#D9D3CA" />
-        <Rect x="224" y="200" width="24" height="12" rx="4" fill="#FFE5D1" stroke={ORANGE} strokeWidth={1.5} />
+        <Rect x="224" y="200" width="24" height="12" rx="4" fill="#FFDDD9" stroke={ORANGE} strokeWidth={1.5} />
       </G>
     </Svg>
   );
@@ -80,8 +80,8 @@ export function MarketIllustration({ height = 230 }: { height?: number }) {
       <Rect x="30" y="60" width="8" height="164" fill="#D5CFC6" />
       <Rect x="282" y="60" width="8" height="164" fill="#D5CFC6" />
       {/* awning */}
-      <Path d="M24 36 H296 V70 Q276 58 256 70 Q236 82 216 70 Q196 58 176 70 Q156 82 136 70 Q116 58 96 70 Q76 82 56 70 Q38 60 24 70 Z" fill="#D9500C" />
-      <Rect x="24" y="30" width="272" height="10" rx="4" fill="#C2410C" />
+      <Path d="M24 36 H296 V70 Q276 58 256 70 Q236 82 216 70 Q196 58 176 70 Q156 82 136 70 Q116 58 96 70 Q76 82 56 70 Q38 60 24 70 Z" fill="#E23A2E" />
+      <Rect x="24" y="30" width="272" height="10" rx="4" fill="#B52419" />
       {/* shelves left */}
       <Rect x="52" y="92" width="64" height="16" rx="3" fill="#7BD3A6" />
       <Rect x="52" y="114" width="64" height="16" rx="3" fill="#F7A58B" />
@@ -101,8 +101,8 @@ export function MarketIllustration({ height = 230 }: { height?: number }) {
       <Rect x="146" y="176" width="11" height="44" rx="3" fill={INK} />
       <Rect x="162" y="176" width="11" height="44" rx="3" fill={INK} />
       <Rect x="140" y="124" width="40" height="60" rx="10" fill="#F4F1EC" />
-      <Rect x="144" y="130" width="14" height="50" rx="5" fill="#E8590C" />
-      <Rect x="162" y="130" width="14" height="50" rx="5" fill="#E8590C" />
+      <Rect x="144" y="130" width="14" height="50" rx="5" fill="#F44236" />
+      <Rect x="162" y="130" width="14" height="50" rx="5" fill="#F44236" />
       <Rect x="153" y="108" width="14" height="18" rx="5" fill={SKIN_DARK} />
       <Circle cx="160" cy="98" r="15" fill={SKIN} />
       <Path d="M145 94 Q148 80 162 82 Q176 82 175 96 Q168 88 145 94Z" fill={HAIR} />
@@ -133,7 +133,7 @@ export function SealIllustration({ height = 230 }: { height?: number }) {
       {/* tape */}
       <Path d="M153 142 L167 142 L167 212 L153 212 Z" fill={ORANGE} />
       {[150, 160, 170, 180, 190, 200].map((y) => (
-        <Line key={y} x1="153" y1={y} x2="167" y2={y} stroke="#FFD1B0" strokeWidth={1.5} strokeDasharray="2 2" />
+        <Line key={y} x1="153" y1={y} x2="167" y2={y} stroke="#FFC9C2" strokeWidth={1.5} strokeDasharray="2 2" />
       ))}
       {/* check seal */}
       <Circle cx="160" cy="168" r="15" fill="#2F9E6E" stroke="#fff" strokeWidth={3} />
@@ -163,12 +163,12 @@ export function DeliveryIllustration({ height = 230 }: { height?: number }) {
       {/* rider */}
       <Rect x="100" y="150" width="9" height="34" rx="3" fill={INK} />
       <Rect x="112" y="150" width="9" height="34" rx="3" fill={INK} />
-      <Path d="M96 104 Q96 94 108 94 L124 94 Q136 94 136 106 L134 150 L98 150 Z" fill="#D9500C" />
+      <Path d="M96 104 Q96 94 108 94 L124 94 Q136 94 136 106 L134 150 L98 150 Z" fill="#E23A2E" />
       <Rect x="106" y="82" width="14" height="14" rx="5" fill={SKIN_DARK} />
       <Circle cx="113" cy="74" r="13" fill={SKIN} />
       <Path d="M99 72 Q100 58 114 58 Q128 58 127 72 Z" fill={INK} />
       <Rect x="122" y="66" width="12" height="5" rx="2" fill={INK} />
-      <Path d="M134 108 L160 120" stroke="#D9500C" strokeWidth={9} strokeLinecap="round" />
+      <Path d="M134 108 L160 120" stroke="#E23A2E" strokeWidth={9} strokeLinecap="round" />
       {/* handoff parcel */}
       <Rect x="158" y="112" width="22" height="18" rx="3" fill="#fff" stroke={ORANGE} strokeWidth={2} />
       <Line x1="158" y1="121" x2="180" y2="121" stroke={ORANGE} strokeWidth={2} />
@@ -243,7 +243,7 @@ export function ProductArt({ kind, size = 80 }: { kind: ProductKind; size?: numb
           <Rect x="46" y="28" width="8" height="8" fill="#B8935A" />
           <Rect x="28" y="36" width="44" height="52" rx="10" fill="#F8D7DE" stroke="#E7A9B6" strokeWidth={2} />
           <Rect x="36" y="52" width="28" height="18" rx="3" fill="#fff" />
-          <Line x1="40" y1="58" x2="60" y2="58" stroke="#E8590C" strokeWidth={2} />
+          <Line x1="40" y1="58" x2="60" y2="58" stroke="#F44236" strokeWidth={2} />
           <Line x1="40" y1="64" x2="54" y2="64" stroke="#D5CFC6" strokeWidth={2} />
         </G>
       )}

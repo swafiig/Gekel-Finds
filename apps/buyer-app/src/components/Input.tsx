@@ -24,7 +24,7 @@ const Input = forwardRef<TextInput, Props>(function Input(
       <Text className="mb-1.5 text-sm font-medium text-ink">{label}</Text>
       <View className={`h-14 flex-row items-center rounded-2xl border bg-white px-4 ${border}`}>
         {icon && (
-          <Ionicons name={icon} size={20} color={focused ? '#E8590C' : '#A8A29E'} style={{ marginRight: 10 }} />
+          <Ionicons name={icon} size={20} color={focused ? '#F44236' : '#A8A29E'} style={{ marginRight: 10 }} />
         )}
         <TextInput
           ref={ref}

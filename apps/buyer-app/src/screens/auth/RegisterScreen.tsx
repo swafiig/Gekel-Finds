@@ -3,8 +3,7 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Screen from '../../components/Screen';
-import BackHeader from '../../components/BackHeader';
+import AuthLayout from '../../components/AuthLayout';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import FormError from '../../components/FormError';
@@ -62,18 +61,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <Screen scroll>
-      <BackHeader />
-      <View className="mt-4 mb-6">
-        <Text className="text-[32px] font-extrabold text-ink">
-          {signupIntent === 'supplier' ? 'Join as a supplier' : 'Create your account'}
-        </Text>
-        <Text className="mt-2 text-base text-ink-soft">
-          {signupIntent === 'supplier'
-            ? 'Set up your account to link your Till and start receiving orders.'
-            : 'Ask for anything in Nairobi and get it at the real price.'}
-        </Text>
-      </View>
+    <AuthLayout title={signupIntent === 'supplier' ? 'Join as a supplier' : 'Create your account'} subtitle={signupIntent === 'supplier' ? 'Set up your account to link your Till and start receiving orders.' : 'Ask for anything in Nairobi and get it at the real price.'}>
 
       <FormError message={formError} />
 
@@ -122,6 +110,6 @@ export default function RegisterScreen() {
           <Text className="text-base font-semibold text-brand-600">Log in</Text>
         </Pressable>
       </View>
-    </Screen>
+    </AuthLayout>
   );
 }

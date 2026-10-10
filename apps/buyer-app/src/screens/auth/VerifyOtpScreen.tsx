@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Screen from '../../components/Screen';
-import BackHeader from '../../components/BackHeader';
+import AuthLayout from '../../components/AuthLayout';
 import OtpInput from '../../components/OtpInput';
 import Button from '../../components/Button';
 import FormError from '../../components/FormError';
@@ -48,15 +47,7 @@ export default function VerifyOtpScreen() {
   };
 
   return (
-    <Screen scroll>
-      <BackHeader />
-      <View className="mt-4 mb-8">
-        <Text className="text-[32px] font-extrabold text-ink">Check your {identifier.includes('@') ? 'email' : 'messages'}</Text>
-        <Text className="mt-2 text-base text-ink-soft">
-          We sent a 6-digit code to <Text className="font-semibold text-ink">{identifier}</Text>.
-        </Text>
-        <Text className="mt-1 text-xs text-ink-mute">(Dev mode: use 123456)</Text>
-      </View>
+    <AuthLayout title={`Check your ${identifier.includes('@') ? 'email' : 'messages'}`} subtitle={`We sent a 6-digit code to ${identifier}. (Dev mode: use 123456)`}>
 
       <FormError message={error} />
       <OtpInput value={code} onChange={(v) => { setCode(v); setError(undefined); }} onComplete={verify} error={!!error} />
@@ -72,6 +63,6 @@ export default function VerifyOtpScreen() {
           </Pressable>
         )}
       </View>
-    </Screen>
+    </AuthLayout>
   );
 }

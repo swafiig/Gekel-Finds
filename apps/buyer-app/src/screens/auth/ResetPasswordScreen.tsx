@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Screen from '../../components/Screen';
-import BackHeader from '../../components/BackHeader';
+import AuthLayout from '../../components/AuthLayout';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import FormError from '../../components/FormError';
@@ -64,12 +64,7 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <Screen scroll>
-      <BackHeader />
-      <View className="mt-4 mb-8">
-        <Text className="text-[32px] font-extrabold text-ink">Set a new password</Text>
-        <Text className="mt-2 text-base text-ink-soft">Choose something you have not used on GEKEL before.</Text>
-      </View>
+    <AuthLayout title="Set a new password" subtitle="Choose something you have not used on GEKEL before.">
       <FormError message={formError} />
       <Input label="New password" icon="lock-closed-outline" placeholder="At least 8 characters" secure
         autoComplete="new-password" textContentType="newPassword" value={password}
@@ -80,6 +75,6 @@ export default function ResetPasswordScreen() {
         value={confirm} onChangeText={(t) => { setConfirm(t); setErrors((p) => ({ ...p, confirm: undefined })); }}
         error={errors.confirm} returnKeyType="go" onSubmitEditing={submit} />
       <Button title="Update password" className="mt-2" onPress={submit} loading={loading} />
-    </Screen>
+    </AuthLayout>
   );
 }

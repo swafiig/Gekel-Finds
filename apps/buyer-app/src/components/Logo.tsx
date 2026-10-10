@@ -1,16 +1,9 @@
 import React from 'react';
-import { Text, View } from 'react-native';
-import { LogoMark } from './Illustrations';
+import { Image } from 'react-native';
 
-export default function Logo({ size = 80, color = '#fff', withWord }: { size?: number; color?: string; withWord?: boolean }) {
-  return (
-    <View className="items-center">
-      <LogoMark size={size} color={color} />
-      {withWord && (
-        <Text style={{ color, letterSpacing: 12 }} className="mt-4 text-[40px] font-bold">
-          GEKEL
-        </Text>
-      )}
-    </View>
-  );
+const SRC = require('../assets/logo.png');
+
+/** GEKEL FINDS logo. `rounded` gives it app-icon corners; turn it off on the splash so it blends into the background. */
+export default function Logo({ size = 160, rounded = true }: { size?: number; rounded?: boolean }) {
+  return <Image source={SRC} style={{ width: size, height: size, borderRadius: rounded ? size * 0.22 : 0 }} resizeMode="contain" accessibilityLabel="GEKEL Finds logo" />;
 }

@@ -80,7 +80,7 @@ export default function AskGekelScreen() {
         </View>
       ) : (
         <Pressable onPress={choosePhoto} accessibilityLabel="Add a picture" className="mb-5 h-28 items-center justify-center rounded-2xl border border-dashed border-brand-400 bg-brand-50 active:opacity-80">
-          <Ionicons name="camera" size={26} color="#E8590C" />
+          <Ionicons name="camera" size={26} color="#F44236" />
           <Text className="mt-1.5 text-sm font-semibold text-brand-600">Add a picture</Text>
         </Pressable>
       )}
@@ -97,7 +97,7 @@ export default function AskGekelScreen() {
         {([['sameDay', 'Same day', 'flash'], ['standard', 'Within 3 days', 'calendar-outline']] as const).map(([k, l, ic]) => (
           <Pressable key={k} onPress={() => setUrgency(k)} accessibilityState={{ selected: urgency === k }}
             className={`h-14 flex-1 flex-row items-center justify-center rounded-2xl border ${urgency === k ? 'border-brand-500 bg-brand-50' : 'border-line bg-white'}`}>
-            <Ionicons name={ic} size={16} color={urgency === k ? '#E8590C' : '#A8A29E'} />
+            <Ionicons name={ic} size={16} color={urgency === k ? '#F44236' : '#A8A29E'} />
             <Text className={`ml-2 text-sm font-semibold ${urgency === k ? 'text-brand-600' : 'text-ink-soft'}`}>{l}</Text>
           </Pressable>
         ))}

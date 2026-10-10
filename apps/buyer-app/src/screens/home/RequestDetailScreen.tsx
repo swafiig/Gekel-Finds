@@ -27,7 +27,7 @@ export default function RequestDetailScreen() {
   }
 
   const status = requestStatus(r);
-  const found = r.stage >= 2 && !r.cancelled ? PRODUCTS.find((p) => p.id === 'p6')! : undefined;
+  const found = r.stage >= 2 && !r.cancelled && r.kind !== 'ownSupplier' ? PRODUCTS.find((p) => p.id === 'p6')! : undefined;
   const canCancel = !r.cancelled && r.stage < 3;
 
   const confirmCancel = () =>
@@ -53,6 +53,15 @@ export default function RequestDetailScreen() {
         <Meta label={r.urgency === 'sameDay' ? 'Same day' : 'Within 3 days'} />
       </View>
 
+      {r.supplier && (
+        <View className="mt-4 rounded-2xl border border-line bg-white p-4">
+          <Text className="text-xs font-bold tracking-widest text-ink-mute">YOUR SUPPLIER</Text>
+          <Text className="mt-1 text-base font-bold text-ink">{r.supplier.name}</Text>
+          <Text className="text-sm text-ink-soft">{r.supplier.location} · {r.supplier.phone}</Text>
+          {r.supplier.till ? <Text className="mt-1 text-sm text-ink-soft">Till {r.supplier.till}</Text> : null}
+        </View>
+      )}
+
       {r.photoUri && <Image source={{ uri: r.photoUri }} className="mt-4 h-44 w-full rounded-2xl" resizeMode="cover" />}
 
       {found && (
@@ -67,7 +76,7 @@ export default function RequestDetailScreen() {
             </View>
           </View>
           <View className="flex-row gap-3 px-3 pb-3">
-            <Button title="Order this" className="h-12 flex-1" onPress={() => nav.navigate('Checkout', { productId: found.id })} />
+            <Button title="Order this" className="h-12 flex-1" onPress={() => nav.navigate('Checkout', { lines: [{ productId: found.id, qty: 1 }] })} />
             <Button title="Chat" variant="outline" icon="chatbubble-outline" className="h-12 flex-1" onPress={() => nav.navigate('ChatRoom', { id: 'c1' })} />
           </View>
         </View>

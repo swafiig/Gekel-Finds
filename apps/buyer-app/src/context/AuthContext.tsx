@@ -21,6 +21,7 @@ interface AuthContextValue {
   login: (identifier: string, password: string) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
+  updateAvatar: (uri: string) => Promise<void>;
 }
 
 const KEYS = { onboarded: 'gekel.onboarded', token: 'gekel.token', user: 'gekel.user' };
@@ -82,9 +83,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStatus('signedOut');
   }, []);
 
+  const updateAvatar = useCallback(async (uri: string) => {
+    setUser((u) => {
+      if (!u) return u;
+      const next = { ...u, avatar: uri };
+      AsyncStorage.setItem(KEYS.user, JSON.stringify(next));
+      return next;
+    });
+    // TODO: upload the image and PATCH /me
+  }, []);
+
   const value = useMemo(
-    () => ({ status, user, signupIntent, setSignupIntent, completeOnboarding, login, register, logout }),
-    [status, user, signupIntent, completeOnboarding, login, register, logout],
+    () => ({ status, user, signupIntent, setSignupIntent, completeOnboarding, login, register, logout, updateAvatar }),
+    [status, user, signupIntent, completeOnboarding, login, register, logout, updateAvatar],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

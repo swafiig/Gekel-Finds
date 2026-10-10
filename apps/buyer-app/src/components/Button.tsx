@@ -39,7 +39,7 @@ export default function Button({ title, variant = 'primary', loading, disabled, 
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color={solid ? '#fff' : '#E8590C'} />
+        <ActivityIndicator color={solid ? '#fff' : '#F44236'} />
       ) : (
         <View className="flex-row items-center">
           {icon && !after && <Ionicons name={icon} size={18} color={iconColor} style={{ marginRight: 8 }} />}

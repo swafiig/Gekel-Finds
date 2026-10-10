@@ -2,8 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Screen from '../../components/Screen';
-import BackHeader from '../../components/BackHeader';
+import AuthLayout from '../../components/AuthLayout';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import FormError from '../../components/FormError';
@@ -41,12 +40,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <Screen scroll>
-      <BackHeader />
-      <View className="mt-4 mb-8">
-        <Text className="text-[32px] font-extrabold text-ink">Welcome back</Text>
-        <Text className="mt-2 text-base text-ink-soft">Log in to keep tracking your requests and orders.</Text>
-      </View>
+    <AuthLayout title="Welcome back" subtitle="Log in to keep tracking your requests and orders.">
 
       <FormError message={formError} />
 
@@ -91,6 +85,6 @@ export default function LoginScreen() {
           <Text className="text-base font-semibold text-brand-600">Create account</Text>
         </Pressable>
       </View>
-    </Screen>
+    </AuthLayout>
   );
 }
