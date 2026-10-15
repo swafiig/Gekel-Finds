@@ -82,7 +82,7 @@ export default function AddressFormScreen() {
       <BackHeader title={editing ? 'Edit address' : 'New address'} />
 
       <View className="mb-5 mt-4 flex-row gap-3">
-        <Pressable onPress={useGps} disabled={locating} className="h-20 flex-1 items-center justify-center rounded-2xl border border-brand-200 bg-brand-50 active:opacity-80">
+        <Pressable onPress={useGps} disabled={locating} className="h-20 flex-1 items-center justify-center rounded-2xl border border-brand-200 bg-brand-50 ">
           <Ionicons name="navigate" size={22} color="#F44236" /><Text className="mt-1 text-sm font-bold text-brand-700">{locating ? 'Locating…' : 'Use my location'}</Text>
         </Pressable>
         <Pressable onPress={() => nav.navigate('MapPicker', { lat: coords?.lat, lng: coords?.lng })} className="h-20 flex-1 items-center justify-center rounded-2xl border border-line bg-white active:bg-cream">

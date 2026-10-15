@@ -49,7 +49,7 @@ export default function CartScreen() {
                     const p = PRODUCTS.find((x) => x.id === l.productId)!;
                     const unit = unitPriceFor(l.productId, l.qty);
                     const wholesale = modeFor(l.productId, l.qty) === 'wholesale';
-                    const need = p.wholesale && s.type !== 'retail' && !wholesale ? p.wholesale.minQty - l.qty : 0;
+                    const need = p.wholesale && !wholesale ? p.wholesale.minQty - l.qty : 0;
                     return (
                       <View key={l.productId} className="border-b border-line px-4 py-3">
                         <View className="flex-row items-center">

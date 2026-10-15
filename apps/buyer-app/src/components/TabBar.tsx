@@ -3,6 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
 
 const ICONS: Record<string, [keyof typeof Ionicons.glyphMap, keyof typeof Ionicons.glyphMap]> = {
   Home: ['home', 'home-outline'],
@@ -14,8 +15,10 @@ const ICONS: Record<string, [keyof typeof Ionicons.glyphMap, keyof typeof Ionico
 /** Custom tab bar with a large raised Search button in the centre. */
 export default function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const { scheme } = useTheme();
+  const inactiveColor = scheme === 'dark' ? '#8A8077' : '#A8A29E';
   return (
-    <View style={{ paddingBottom: Math.max(insets.bottom, 8) }} className="flex-row items-end border-t border-line bg-white px-2 pt-2">
+    <View style={{ paddingBottom: Math.max(insets.bottom, 8) }} className="flex-row items-end border-t border-line dark:border-surface-line bg-white dark:bg-surface px-2 pt-2">
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const badge = descriptors[route.key].options.tabBarBadge;
@@ -42,7 +45,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
         }
 
         const [on, off] = ICONS[route.name];
-        const color = focused ? '#F44236' : '#A8A29E';
+        const color = focused ? '#F44236' : inactiveColor;
         return (
           <Pressable key={route.key} onPress={onPress} accessibilityRole="button" accessibilityLabel={route.name} className="flex-1 items-center pb-1 pt-1">
             <View>

@@ -10,7 +10,7 @@ interface Props {
 }
 
 /** Safe area + keyboard avoiding + optional scroll. Wrap every screen in this. */
-export default function Screen({ children, scroll, bg = 'bg-cream', className = '' }: Props) {
+export default function Screen({ children, scroll, bg = 'bg-cream dark:bg-surface', className = '' }: Props) {
   const inner = scroll ? (
     <ScrollView
       className="flex-1"

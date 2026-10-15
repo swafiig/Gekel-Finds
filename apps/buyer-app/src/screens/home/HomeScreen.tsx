@@ -11,7 +11,7 @@ import { FlashTimer } from '../../components/FlashTimer';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { useAppData, requestNote, requestStatus, isActive, orderStages } from '../../context/AppDataContext';
-import { GREETINGS, MARKET_STATUS, PRODUCTS, SUPPLIERS } from '../../data/mock';
+import { CATEGORIES, GREETINGS, MARKET_STATUS, PRODUCTS, SUPPLIERS } from '../../data/mock';
 import { formatKm, haversineKm } from '../../utils/geo';
 import { useNav } from '../../hooks/useNav';
 
@@ -19,7 +19,7 @@ const TONE = { red: 'bg-red-500', green: 'bg-green-500', amber: 'bg-amber-400' }
 
 export default function HomeScreen() {
   const nav = useNav();
-  const { user } = useAuth();
+  const { user, justRegistered, clearJustRegistered } = useAuth();
   const { openMenu } = useUI();
   const { requests, orders, unreadNotifications, avatarUri, cart, defaultAddress, userCoords, locationDenied, requestLocation } = useAppData();
   const [refreshing, setRefreshing] = useState(false);
@@ -28,6 +28,11 @@ export default function HomeScreen() {
   const [sheet, setSheet] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setLoading(false), 700); return () => clearTimeout(t); }, []);
+
+  // Right after signup the SMS code is already on its way: open the verification screen once.
+  useEffect(() => {
+    if (justRegistered && user && !user.phoneVerified) { clearJustRegistered(); nav.navigate('VerifyPhone', { autoSend: false }); }
+  }, [justRegistered, user, clearJustRegistered, nav]);
 
   const hour = new Date().getHours();
   const period = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
@@ -46,10 +51,10 @@ export default function HomeScreen() {
   const flash = PRODUCTS.filter((p) => p.flashEndsAt);
   const flashEnd = Math.min(...flash.map((p) => p.flashEndsAt!));
   const sameDay = PRODUCTS.filter((p) => p.sameDay && !p.badge);
-  const search = () => (query.trim() ? nav.navigate('Main', { screen: 'Finds' }) : nav.navigate('AskGekel'));
+  const search = () => (query.trim() ? nav.navigate('Main', { screen: 'Finds', params: { q: query.trim() } }) : nav.navigate('AskGekel'));
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-surface" edges={['top']}>
       <ScrollView
         showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 28 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#F44236" colors={['#F44236']} />}
@@ -60,7 +65,7 @@ export default function HomeScreen() {
             <Avatar uri={avatarUri} name={user?.name} size={40} />
           </Pressable>
           <View className="ml-3 flex-1">
-            <Text numberOfLines={1} className="text-lg font-extrabold text-ink">{greet}, {user?.name ?? 'rafiki'} 👋</Text>
+            <Text numberOfLines={1} className="text-lg font-extrabold text-ink">{greet}, {user?.name?.split(' ')[0] ?? 'rafiki'} 👋</Text>
             <Pressable onPress={() => setSheet(true)} hitSlop={6} className="flex-row items-center">
               <Ionicons name="location" size={12} color="#F44236" />
               <Text numberOfLines={1} className="ml-1 max-w-[170px] text-xs font-semibold text-ink-soft">{defaultAddress ? `Delivering to ${defaultAddress.area}` : 'Add a delivery address'}</Text>
@@ -79,17 +84,42 @@ export default function HomeScreen() {
           {query.length > 0 && <Pressable hitSlop={8} onPress={() => setQuery('')}><Ionicons name="close-circle" size={18} color="#A8A29E" /></Pressable>}
         </View>
 
+        {/* phone verification nudge (disappears once verified) */}
+        {user && !user.phoneVerified && (
+          <Pressable onPress={() => nav.navigate('VerifyPhone', { autoSend: true })} accessibilityLabel="Verify your phone number" className="mx-5 mt-4 flex-row items-center rounded-2xl bg-amber-50 p-3.5 ">
+            <Ionicons name="shield-half-outline" size={22} color="#B7791F" />
+            <View className="ml-3 flex-1"><Text className="text-sm font-bold text-ink">Verify your phone number</Text><Text className="text-xs text-ink-soft">Keeps your account safe and lets you recover it.</Text></View>
+            <Text className="text-sm font-bold text-amber-800">Verify</Text>
+          </Pressable>
+        )}
+
         {/* ask hero */}
         <View className="mx-5 mt-4"><AskGekelButton variant="hero" /></View>
 
         {/* quick tiles */}
-        <View className="mt-4 flex-row gap-3 px-5">
-          {([['storefront-outline', 'Suppliers', () => nav.navigate('Suppliers')], ['layers-outline', 'Wholesale', () => nav.navigate('Suppliers', { tab: 'wholesale' })], ['people-outline', 'Chama Buy', () => nav.navigate('ProductDetail', { id: 'p6' })]] as const).map(([ic, l, fn]) => (
-            <Pressable key={l} onPress={fn} className="h-[72px] flex-1 items-center justify-center rounded-2xl border border-line bg-white active:bg-cream">
-              <Ionicons name={ic} size={22} color="#F44236" /><Text className="mt-1 text-xs font-bold text-ink">{l}</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4" contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}>
+          {([
+            ['storefront-outline', 'Suppliers', () => nav.navigate('Suppliers')],
+            ['people-outline', 'Chama Buy', () => nav.navigate('Main', { screen: 'Finds' })],
+            ['briefcase-outline', 'Errands', () => nav.navigate('Errands')],
+            ['sparkles-outline', 'Points', () => nav.navigate('Points')],
+          ] as const).map(([ic, l, fn]) => (
+            <Pressable key={l} onPress={fn} className="h-[72px] w-[84px] items-center justify-center rounded-2xl border border-line dark:border-surface-line bg-white dark:bg-surface active:bg-cream dark:active:bg-surface-soft">
+              <Ionicons name={ic} size={22} color="#F44236" /><Text className="mt-1 text-xs font-bold text-ink dark:text-sink">{l}</Text>
             </Pressable>
           ))}
-        </View>
+        </ScrollView>
+
+        {/* categories */}
+        <Text className="mb-2 mt-6 px-5 text-xs font-bold tracking-widest text-ink-soft dark:text-sink-soft">BROWSE BY CATEGORY</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}>
+          {CATEGORIES.map((c) => (
+            <Pressable key={c.id} onPress={() => nav.navigate('Main', { screen: 'Finds', params: { cat: c.id } })} style={{ backgroundColor: c.color }} className="w-24 items-center rounded-2xl p-3">
+              <Ionicons name={c.icon as any} size={22} color="#57534E" />
+              <Text numberOfLines={2} className="mt-1.5 text-center text-[11px] font-bold leading-4 text-ink">{c.name}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
         {/* soko leo */}
         <View className="mb-2 mt-6 flex-row items-center px-5"><Text className="text-xs font-bold tracking-widest text-ink-soft">SOKO LEO</Text><Text className="ml-2 text-xs text-ink-mute">how the markets look right now</Text></View>
@@ -104,7 +134,7 @@ export default function HomeScreen() {
 
         {/* nearest shop / location prompt */}
         {nearest ? (
-          <Pressable onPress={() => nav.navigate('SupplierProfile', { id: nearest.s.id })} className="mx-5 mt-4 flex-row items-center rounded-2xl bg-cream p-3.5 active:opacity-80">
+          <Pressable onPress={() => nav.navigate('SupplierProfile', { id: nearest.s.id })} className="mx-5 mt-4 flex-row items-center rounded-2xl bg-cream p-3.5 ">
             <View className="h-10 w-10 items-center justify-center rounded-full bg-white"><Ionicons name="navigate" size={18} color="#F44236" /></View>
             <View className="ml-3 flex-1"><Text className="text-xs text-ink-soft">Nearest shop to you</Text><Text className="text-base font-bold text-ink">{nearest.s.name} · {formatKm(nearest.km)}</Text></View>
             <Ionicons name="chevron-forward" size={18} color="#A8A29E" />
@@ -119,11 +149,11 @@ export default function HomeScreen() {
 
         {/* live delivery */}
         {inTransit && (
-          <Pressable onPress={() => nav.navigate('OrderDetail', { id: inTransit.id })} className="mx-5 mt-4 flex-row items-center rounded-2xl bg-ink p-4 active:opacity-90">
+          <Pressable onPress={() => nav.navigate('OrderDetail', { id: inTransit.id })} className="mx-5 mt-4 flex-row items-center rounded-2xl bg-ink p-4 ">
             <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-500"><Ionicons name={inTransit.delivery.method === 'courier' ? 'cube' : 'bicycle'} size={22} color="#fff" /></View>
             <View className="ml-3 flex-1">
               <Text className="text-base font-bold text-white">{orderStages(inTransit)[inTransit.stage]}</Text>
-              <Text className="text-sm text-white/75">{inTransit.etaMinutes > 0 && inTransit.delivery.method === 'rider' ? `Arriving in about ${inTransit.etaMinutes} min` : 'Tap to track your order'}</Text>
+              <Text className="text-sm text-white-75">{inTransit.etaMinutes > 0 && inTransit.delivery.method === 'rider' ? `Arriving in about ${inTransit.etaMinutes} min` : 'Tap to track your order'}</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#fff" />
           </Pressable>

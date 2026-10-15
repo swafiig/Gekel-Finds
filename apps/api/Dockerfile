@@ -1,27 +1,14 @@
-FROM golang:1.27-alpine AS builder
-
-WORKDIR /app
-
-RUN apk add --no-cache ca-certificates
-
+# syntax=docker/dockerfile:1
+FROM golang:1.24-alpine AS build
+WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
-
 COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/server ./cmd/server
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -trimpath -ldflags="-s -w" \
-    -o /bin/gekel-api ./cmd/server
-
-
-FROM gcr.io/distroless/static-debian13:nonroot
-
-WORKDIR /app
-
-COPY --from=builder /bin/gekel-api /app/gekel-api
-
+# Distroless: no shell, no package manager, runs as non-root.
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/server /server
 USER nonroot:nonroot
-
 EXPOSE 8080
-
-ENTRYPOINT ["/app/gekel-api"]
+ENTRYPOINT ["/server"]

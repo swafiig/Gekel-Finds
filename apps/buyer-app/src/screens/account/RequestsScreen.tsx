@@ -17,7 +17,7 @@ export default function RequestsScreen() {
         className="mt-4" data={requests} keyExtractor={(r) => r.id} showsVerticalScrollIndicator={false}
         ListEmptyComponent={<EmptyState icon="list-outline" title="No requests yet" body="Ask GEKEL for anything and it shows up here." cta="Ask GEKEL" onCta={() => nav.replace('AskGekel')} />}
         renderItem={({ item: r }) => (
-          <Pressable onPress={() => nav.navigate('RequestDetail', { id: r.id })} className="mb-3 rounded-2xl border border-line bg-white p-4 active:bg-cream">
+          <Pressable onPress={() => nav.navigate('RequestDetail', { id: r.id })} className="mb-3 rounded-2xl border border-line dark:border-surface-line bg-white dark:bg-surface p-4 active:bg-cream dark:active:bg-surface-soft">
             <View className="flex-row items-start justify-between"><Text className="flex-1 pr-3 text-base font-bold text-ink">{r.title}</Text><Text className="text-xs font-bold text-brand-600">{requestStatus(r)}</Text></View>
             <Text className="mt-1 text-sm text-ink-soft">{requestNote(r)} · {timeAgo(r.createdAt)}</Text>
           </Pressable>

@@ -10,8 +10,8 @@ export default function EmptyState({ icon, title, body, cta, onCta }: { icon: ke
       <View className="mb-5 h-20 w-20 items-center justify-center rounded-full bg-brand-50">
         <Ionicons name={icon} size={34} color="#F44236" />
       </View>
-      <Text className="text-center text-xl font-bold text-ink">{title}</Text>
-      <Text className="mt-2 text-center text-base text-ink-soft">{body}</Text>
+      <Text className="text-center text-xl font-bold text-ink dark:text-sink">{title}</Text>
+      <Text className="mt-2 text-center text-base text-ink-soft dark:text-sink-soft">{body}</Text>
       {cta && onCta && (cta === 'Ask GEKEL' ? <View className="mt-6 self-stretch"><AskGekelButton onPress={onCta} /></View> : <Button title={cta} className="mt-6 self-stretch" onPress={onCta} />)}
     </View>
   );

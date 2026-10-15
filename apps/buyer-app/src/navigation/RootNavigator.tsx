@@ -27,6 +27,19 @@ import AddressFormScreen from '../screens/account/AddressFormScreen';
 import MapPickerScreen from '../screens/account/MapPickerScreen';
 import PaymentsScreen from '../screens/account/PaymentsScreen';
 import RequestsScreen from '../screens/account/RequestsScreen';
+import EditProfileScreen from '../screens/account/EditProfileScreen';
+import SessionsScreen from '../screens/account/SessionsScreen';
+import ChangePasswordScreen from '../screens/account/ChangePasswordScreen';
+import VerifyPhoneScreen from '../screens/account/VerifyPhoneScreen';
+import PointsScreen from '../screens/account/PointsScreen';
+import ChamaListScreen from '../screens/chama/ChamaListScreen';
+import ChamaCreateScreen from '../screens/chama/ChamaCreateScreen';
+import ChamaDetailScreen from '../screens/chama/ChamaDetailScreen';
+import ErrandsScreen from '../screens/errands/ErrandsScreen';
+import ErrandDetailScreen from '../screens/errands/ErrandDetailScreen';
+import ShelfScreen from '../screens/seller/ShelfScreen';
+import RestockScreen from '../screens/seller/RestockScreen';
+import ReturnRequestScreen from '../screens/home/ReturnRequestScreen';
 import MainTabs from './MainTabs';
 import type { RootStackParamList } from '../types/navigation';
 
@@ -72,6 +85,19 @@ export default function RootNavigator() {
           <Stack.Screen name="AddressForm" component={AddressFormScreen} />
           <Stack.Screen name="MapPicker" component={MapPickerScreen} />
           <Stack.Screen name="Payments" component={PaymentsScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="Sessions" component={SessionsScreen} />
+          <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+          <Stack.Screen name="VerifyPhone" component={VerifyPhoneScreen} />
+          <Stack.Screen name="Points" component={PointsScreen} />
+          <Stack.Screen name="ChamaList" component={ChamaListScreen} />
+          <Stack.Screen name="ChamaCreate" component={ChamaCreateScreen} />
+          <Stack.Screen name="ChamaDetail" component={ChamaDetailScreen} />
+          <Stack.Screen name="Errands" component={ErrandsScreen} />
+          <Stack.Screen name="ErrandDetail" component={ErrandDetailScreen} />
+          <Stack.Screen name="Shelf" component={ShelfScreen} />
+          <Stack.Screen name="Restock" component={RestockScreen} />
+          <Stack.Screen name="ReturnRequest" component={ReturnRequestScreen} />
         </Stack.Group>
       )}
     </Stack.Navigator>

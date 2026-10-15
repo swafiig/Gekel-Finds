@@ -27,7 +27,7 @@ export default function OrdersScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-surface" edges={["top"]}>
       <Text className="px-5 pt-3 text-[28px] font-extrabold text-ink">
         Orders
       </Text>

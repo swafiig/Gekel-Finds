@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "5764c8f3-3c00-4c18-934f-9b08b24b359a"
+      }
+    },
+    "android": {
+      "package": "com.gekelfinds.buyer"
+    }
+  }
+}

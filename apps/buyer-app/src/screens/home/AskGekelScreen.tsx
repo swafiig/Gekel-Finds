@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import Screen from '../../components/Screen';
 import BackHeader from '../../components/BackHeader';
 import Input from '../../components/Input';
@@ -10,11 +11,18 @@ import Chip from '../../components/Chip';
 import { useAppData } from '../../context/AppDataContext';
 import { CATEGORIES } from '../../data/mock';
 import { useNav } from '../../hooks/useNav';
+import type { RootStackParamList } from '../../types/navigation';
 
+/**
+ * Ask GEKEL: the "I don't want to browse, just find it for me" path.
+ * Tell us what you need, we search the markets, and we tell you honestly if we can't find it —
+ * we promise to try for up to 3 days before we do.
+ */
 export default function AskGekelScreen() {
   const nav = useNav();
+  const prefill = useRoute<RouteProp<RootStackParamList, 'AskGekel'>>().params?.prefill;
   const { addRequest } = useAppData();
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(prefill ?? '');
   const [category, setCategory] = useState<string>();
   const [budget, setBudget] = useState('');
   const [urgency, setUrgency] = useState<'sameDay' | 'standard'>('standard');
@@ -53,15 +61,15 @@ export default function AskGekelScreen() {
   return (
     <Screen scroll>
       <BackHeader title="Ask GEKEL" />
-      <Text className="mb-6 mt-4 text-base leading-6 text-ink-soft">
-        Tell us what you need or upload a picture. We find it, confirm the price, then you decide.
+      <Text className="mb-6 mt-4 text-base leading-6 text-ink-soft dark:text-sink-soft">
+        Tell us what you need or upload a picture — no need to browse. We look in the markets, confirm the price, and let you decide. If it truly isn't out there, we'll tell you within 3 days.
       </Text>
 
-      <Text className="mb-1.5 text-sm font-medium text-ink">What do you need?</Text>
-      <View className={`mb-4 min-h-[96px] rounded-2xl border bg-white px-4 py-3 ${error ? 'border-danger' : 'border-line'}`}>
+      <Text className="mb-1.5 text-sm font-medium text-ink dark:text-sink">What do you need?</Text>
+      <View className={`mb-4 min-h-[96px] rounded-2xl border bg-white dark:bg-surface px-4 py-3 ${error ? 'border-danger' : 'border-line dark:border-surface-line'}`}>
         <TextInput
           multiline
-          className="text-base text-ink"
+          className="text-base text-ink dark:text-sink"
           style={{ minHeight: 70, textAlignVertical: 'top' }}
           placeholder="Black hoodie, size L, plain with no logo"
           placeholderTextColor="#A8A29E"
@@ -74,31 +82,31 @@ export default function AskGekelScreen() {
       {photo ? (
         <View className="mb-5 h-40 overflow-hidden rounded-2xl">
           <Image source={{ uri: photo }} className="h-full w-full" resizeMode="cover" />
-          <Pressable onPress={() => setPhoto(undefined)} className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-black/60" accessibilityLabel="Remove photo">
+          <Pressable onPress={() => setPhoto(undefined)} className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-black-60" accessibilityLabel="Remove photo">
             <Ionicons name="close" size={18} color="#fff" />
           </Pressable>
         </View>
       ) : (
-        <Pressable onPress={choosePhoto} accessibilityLabel="Add a picture" className="mb-5 h-28 items-center justify-center rounded-2xl border border-dashed border-brand-400 bg-brand-50 active:opacity-80">
+        <Pressable onPress={choosePhoto} accessibilityLabel="Add a picture" className="mb-5 h-28 items-center justify-center rounded-2xl border border-dashed border-brand-400 bg-brand-50 ">
           <Ionicons name="camera" size={26} color="#F44236" />
           <Text className="mt-1.5 text-sm font-semibold text-brand-600">Add a picture</Text>
         </Pressable>
       )}
 
-      <Text className="mb-2 text-sm font-medium text-ink">Category</Text>
+      <Text className="mb-2 text-sm font-medium text-ink dark:text-sink">Category (optional)</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-5 -mx-6" contentContainerStyle={{ paddingHorizontal: 24 }}>
-        {CATEGORIES.map((c) => <Chip key={c} label={c} active={category === c} onPress={() => setCategory(category === c ? undefined : c)} />)}
+        {CATEGORIES.map((c) => <Chip key={c.id} label={c.name} active={category === c.id} onPress={() => setCategory(category === c.id ? undefined : c.id)} />)}
       </ScrollView>
 
       <Input label="Budget (KSh, optional)" icon="cash-outline" placeholder="2000" keyboardType="number-pad" value={budget} onChangeText={setBudget} />
 
-      <Text className="mb-2 text-sm font-medium text-ink">When do you need it?</Text>
+      <Text className="mb-2 text-sm font-medium text-ink dark:text-sink">When do you need it?</Text>
       <View className="mb-6 flex-row gap-3">
         {([['sameDay', 'Same day', 'flash'], ['standard', 'Within 3 days', 'calendar-outline']] as const).map(([k, l, ic]) => (
           <Pressable key={k} onPress={() => setUrgency(k)} accessibilityState={{ selected: urgency === k }}
-            className={`h-14 flex-1 flex-row items-center justify-center rounded-2xl border ${urgency === k ? 'border-brand-500 bg-brand-50' : 'border-line bg-white'}`}>
+            className={`h-14 flex-1 flex-row items-center justify-center rounded-2xl border ${urgency === k ? 'border-brand-500 bg-brand-50' : 'border-line dark:border-surface-line bg-white dark:bg-surface'}`}>
             <Ionicons name={ic} size={16} color={urgency === k ? '#F44236' : '#A8A29E'} />
-            <Text className={`ml-2 text-sm font-semibold ${urgency === k ? 'text-brand-600' : 'text-ink-soft'}`}>{l}</Text>
+            <Text className={`ml-2 text-sm font-semibold ${urgency === k ? 'text-brand-600' : 'text-ink-soft dark:text-sink-soft'}`}>{l}</Text>
           </Pressable>
         ))}
       </View>

@@ -13,7 +13,7 @@ export default function AddressSheet({ visible, onClose }: { visible: boolean; o
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/40">
+      <View className="flex-1 justify-end bg-black-40">
         <Pressable className="flex-1" onPress={onClose} />
         <View className="rounded-t-[28px] bg-white px-5 pb-8 pt-3">
           <View className="mb-3 h-1.5 w-12 self-center rounded-full bg-line" />

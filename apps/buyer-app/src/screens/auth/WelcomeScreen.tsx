@@ -24,7 +24,7 @@ export default function WelcomeScreen() {
         <View className="px-6 pb-4">
           <Button title="Get Started" variant="light" onPress={() => nav.navigate('Register')} />
           <Button title="Login" variant="dark" className="mt-3" onPress={() => nav.navigate('Login')} />
-          <View className="mt-5 h-1 w-32 self-center rounded-full bg-white/60" />
+          <View className="mt-5 h-1 w-32 self-center rounded-full bg-white-60" />
         </View>
       </SafeAreaView>
     </View>

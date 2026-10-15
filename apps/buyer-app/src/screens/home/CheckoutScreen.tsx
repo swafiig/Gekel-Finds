@@ -7,8 +7,9 @@ import BackHeader from '../../components/BackHeader';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
+import { useOffline } from '../../context/OfflineContext';
 import { formatAddress, unitPriceFor, useAppData } from '../../context/AppDataContext';
-import { COURIERS, DeliveryChoice, PICKUP_POINTS, PRODUCTS, SERVICE_FEE, SUPPLIERS, deliveryFee, formatKsh } from '../../data/mock';
+import { DeliveryChoice, PICKUP_POINTS, PRODUCTS, SERVICE_FEE, SUPPLIERS, TransportOption, deliveryFee, formatKsh, transportFor } from '../../data/mock';
 import { isKenyanPhone } from '../../utils/validation';
 import { useNav } from '../../hooks/useNav';
 import type { RootStackParamList } from '../../types/navigation';
@@ -31,6 +32,7 @@ export default function CheckoutScreen() {
   const { lines, fromCart } = useRoute<RouteProp<RootStackParamList, 'Checkout'>>().params;
   const { user } = useAuth();
   const { addresses, defaultAddress, payNumbers, placeBundle, clearOrdered, resellerMode } = useAppData();
+  const { isOffline } = useOffline();
 
   const shops = useMemo(() => new Set(lines.map((l) => PRODUCTS.find((p) => p.id === l.productId)!.supplierId)), [lines]);
   const stops = shops.size;
@@ -39,10 +41,14 @@ export default function CheckoutScreen() {
   const [addrId, setAddrId] = useState(defaultAddress?.id);
   const address = addresses.find((a) => a.id === addrId);
   const nairobi = !address || address.county === 'Nairobi';
+  React.useEffect(() => { setCourierId((prev) => (transportOptions.some((t) => t.id === prev) ? prev : transportOptions[0]?.id)); }, [address?.county]); // eslint-disable-line react-hooks/exhaustive-deps
   const [speed, setSpeed] = useState<'standard' | 'express'>('standard');
   const [dest, setDest] = useState<'door' | 'pickup'>('door');
   const [pickupPoint, setPickupPoint] = useState(PICKUP_POINTS[0]);
-  const [courier, setCourier] = useState(COURIERS[0]);
+  const transportOptions = address ? transportFor(address.county) : [];
+  const [courierId, setCourierId] = useState<string | undefined>(transportOptions[0]?.id);
+  const courierOpt: TransportOption | undefined = transportOptions.find((t) => t.id === courierId) ?? transportOptions[0];
+  const courier = courierOpt?.name ?? '';
   const [pay, setPay] = useState<'now' | 'later'>('later');
   const [shipTo, setShipTo] = useState<'me' | 'customer'>(resellerMode ? 'customer' : 'me');
   const [cName, setCName] = useState('');
@@ -151,9 +157,14 @@ export default function CheckoutScreen() {
         </>
       ) : (
         <>
-          <View className="mb-3 flex-row items-start rounded-2xl bg-amber-50 p-3"><Ionicons name="information-circle" size={18} color="#B7791F" style={{ marginTop: 1 }} /><Text className="ml-2 flex-1 text-sm leading-5 text-amber-900">{address?.town} is outside Nairobi. A GEKEL rider takes your parcel to the courier, uploads the receipt and gives you the waybill number to track it. Takes 1 to 3 working days.</Text></View>
+          <View className="mb-3 flex-row items-start rounded-2xl bg-amber-50 p-3"><Ionicons name="information-circle" size={18} color="#B7791F" style={{ marginTop: 1 }} /><Text className="ml-2 flex-1 text-sm leading-5 text-amber-900">We run one motorbike rider for Nairobi while we grow, so {address?.town ?? 'your area'} is outside their reach. The rider hands your parcel to the courier or Sacco you choose below, uploads the receipt, and gives you a waybill to track it. Takes 1 to 3 working days.</Text></View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-6 mb-3" contentContainerStyle={{ paddingHorizontal: 24, gap: 8 }}>
-            {COURIERS.map((c) => <Pressable key={c} onPress={() => setCourier(c)} className={`h-10 justify-center rounded-full border px-4 ${courier === c ? 'border-brand-500 bg-brand-500' : 'border-line bg-white'}`}><Text className={`text-sm font-semibold ${courier === c ? 'text-white' : 'text-ink-soft'}`}>{c}</Text></Pressable>)}
+            {transportOptions.map((t) => (
+              <Pressable key={t.id} onPress={() => setCourierId(t.id)} className={`h-10 flex-row items-center justify-center rounded-full border px-4 ${courierId === t.id ? 'border-brand-500 bg-brand-500' : 'border-line dark:border-surface-line bg-white dark:bg-surface'}`}>
+                {t.kind === 'sacco' && <Ionicons name="bus" size={13} color={courierId === t.id ? '#fff' : '#57534E'} style={{ marginRight: 5 }} />}
+                <Text className={`text-sm font-semibold ${courierId === t.id ? 'text-white' : 'text-ink-soft dark:text-sink-soft'}`}>{t.name}{t.kind === 'sacco' ? ' (Sacco)' : ''}</Text>
+              </Pressable>
+            ))}
           </ScrollView>
           <Option active={dest === 'door'} icon="home-outline" title="Courier to my door" body={`${courier} delivers to your address`} price={formatKsh(deliveryFee({ ...delivery, dest: 'door' }, stops))} onPress={() => setDest('door')} />
           <Option active={dest === 'pickup'} icon="business-outline" title="Collect at courier office" body="Cheaper. They call you when it arrives." price={formatKsh(deliveryFee({ ...delivery, dest: 'pickup' }, stops))} onPress={() => setDest('pickup')} />
@@ -182,7 +193,13 @@ export default function CheckoutScreen() {
         <Text className="ml-3 flex-1 text-sm leading-5 text-ink">Next, each shop confirms availability in chat. You say OK, then pay with an M-Pesa prompt or to their Till.</Text>
       </View>
 
-      <Button title={pay === 'now' ? `Pay ${formatKsh(fees)} & place order` : 'Place order'} onPress={submit} />
+      {isOffline && (
+        <View className="mb-3 flex-row items-start rounded-2xl bg-amber-50 p-3">
+          <Ionicons name="cloud-offline-outline" size={18} color="#B7791F" style={{ marginTop: 1 }} />
+          <Text className="ml-3 flex-1 text-sm leading-5 text-amber-900">You're offline. Orders and payments need a connection — reconnect to place this order.</Text>
+        </View>
+      )}
+      <Button title={pay === 'now' ? `Pay ${formatKsh(fees)} & place order` : 'Place order'} onPress={submit} disabled={isOffline} />
     </Screen>
   );
 }

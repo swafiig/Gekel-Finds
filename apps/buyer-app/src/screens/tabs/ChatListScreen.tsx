@@ -9,7 +9,7 @@ export default function ChatListScreen() {
   const nav = useNav();
   const { chats } = useAppData();
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-surface" edges={['top']}>
       <Text className="px-5 pb-3 pt-3 text-[28px] font-extrabold text-ink">Chat</Text>
       <FlatList
         data={chats}

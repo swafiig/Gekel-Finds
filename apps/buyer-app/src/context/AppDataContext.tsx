@@ -1,6 +1,10 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import * as Location from 'expo-location';
-import { DELIVERED, DeliveryChoice, ORDER_STAGES, PRODUCTS, REQUEST_STAGES, SERVICE_FEE, SUPPLIERS, Supplier, courierScript, deliveryFee } from '../data/mock';
+import {
+  AppNotification, DELIVERED, DeliveryChoice, NOTIFICATIONS, ORDER_STAGES, PRODUCTS, REQUEST_STAGES, SERVICE_FEE, SUPPLIERS, Supplier,
+  courierScript, deliveryFee,
+} from '../data/mock';
+import { useOffline } from './OfflineContext';
 
 /* ═════════ Types ═════════ */
 export interface GekelRequest {
@@ -30,6 +34,12 @@ export interface CourierEvent { id: string; at: number; text: string }
 export interface CourierInfo { name: string; waybill: string; receiptUri?: string; events: CourierEvent[] }
 export interface OrderItem { productId: string; qty: number; unitPrice: number }
 
+export type ReturnStatus = 'requested' | 'discussing' | 'approved' | 'declined' | 'pickup_booked' | 'refunded';
+export interface ReturnRequest {
+  reason: string; photoUri?: string; status: ReturnStatus; at: number;
+  payer?: 'buyer' | 'supplier'; // who covers the return delivery + service fee
+}
+
 export interface Order {
   id: string; bundleId?: string; stops: number;
   supplierId: string; chatId: string; items: OrderItem[];
@@ -41,6 +51,7 @@ export interface Order {
   rider: { name: string; phone: string; vehicle: string };
   courier?: CourierInfo; etaMinutes: number; createdAt: number;
   events: TrackEvent[]; rating?: { supplier: number; rider: number };
+  returnRequest?: ReturnRequest;
 }
 
 export type MsgKind = 'text' | 'quote' | 'till' | 'payment';
@@ -53,6 +64,23 @@ export interface ChatThread {
   supplierId?: string; messages: Message[];
 }
 
+/* ─── Chama Buy: a group order built from contacts, with a pre-pay or post-pay split ─── */
+export interface ChamaMember { id: string; name: string; phone: string; qty: number; paid: boolean }
+export interface ChamaOrder {
+  id: string; productId: string; targetQty: number; unitPrice: number;
+  payMode: 'pre' | 'post'; payerMemberId?: string; // for 'post': the one person who pays on delivery
+  members: ChamaMember[]; status: 'collecting' | 'ready' | 'ordered'; createdAt: number; orderId?: string;
+}
+
+/* ─── Gekel Errands: odd local jobs, not just "buy and deliver" ─── */
+export const ERRAND_STAGES = ['Request sent', 'Runner assigned', 'In progress', 'Completed'];
+export interface ErrandRequest { id: string; typeId: string; details: string; photoUri?: string; stage: number; createdAt: number }
+
+/* ─── Rent-a-Shelf: restocking from a wholesaler into space GEKEL rents to an online seller ─── */
+export interface RestockJob { id: string; productId: string; qty: number; supplierId: string; stage: number; createdAt: number }
+export const RESTOCK_STAGES = ['Order placed with wholesaler', 'Rider collecting', 'At GEKEL sorting centre', 'Stocked on your shelf'];
+export interface ShelfInfo { capacityUnits: number; stock: Record<string, number> } // productId -> units on the shelf
+
 export const orderStages = (o: Pick<Order, 'delivery'>) =>
   o.delivery.method === 'courier' ? ['Awaiting payment', 'Payment confirmed', 'Packed & sealed', 'Handed to courier', 'Delivered'] : ORDER_STAGES;
 export const isActive = (o: Order) => !o.cancelled && o.stage < DELIVERED;
@@ -62,14 +90,13 @@ export const requestStatus = (r: GekelRequest): RequestStatus =>
   r.cancelled ? 'Cancelled' : r.stage >= REQUEST_STAGES.length - 1 ? 'Delivered' : r.stage >= 2 ? 'Found' : 'Active';
 export const requestNote = (r: GekelRequest) => {
   if (r.cancelled) return 'Cancelled';
-  if (r.stage <= 1) return `Searching… Day ${Math.min(3, 1 + Math.floor((Date.now() - r.createdAt) / 86400000))} of 3`;
+  if (r.stage <= 1) return `GEKEL is looking… Day ${Math.min(3, 1 + Math.floor((Date.now() - r.createdAt) / 86400000))} of 3`;
   return REQUEST_STAGES[r.stage];
 };
 
 export const modeFor = (productId: string, qty: number): 'retail' | 'wholesale' => {
   const p = PRODUCTS.find((x) => x.id === productId)!;
-  const s = SUPPLIERS.find((x) => x.id === p.supplierId)!;
-  return p.wholesale && s.type !== 'retail' && qty >= p.wholesale.minQty ? 'wholesale' : 'retail';
+  return p.wholesale && qty >= p.wholesale.minQty ? 'wholesale' : 'retail';
 };
 export const unitPriceFor = (productId: string, qty: number) => {
   const p = PRODUCTS.find((x) => x.id === productId)!;
@@ -85,7 +112,8 @@ interface Ctx {
   requests: GekelRequest[]; orders: Order[]; chats: ChatThread[]; favorites: string[]; cart: CartLine[];
   addresses: Address[]; defaultAddress?: Address; payNumbers: PayNumber[];
   avatarUri?: string; userCoords?: { lat: number; lng: number }; locationDenied: boolean;
-  unreadNotifications: number; resellerMode: boolean;
+  notifications: AppNotification[]; unreadNotifications: number; resellerMode: boolean; following: string[]; points: number;
+  chamas: ChamaOrder[]; errands: ErrandRequest[]; restockJobs: RestockJob[]; shelf: ShelfInfo;
   setResellerMode: (v: boolean) => void; setAvatarUri: (u?: string) => void;
   requestLocation: () => Promise<boolean>;
   addRequest: (r: Omit<GekelRequest, 'id' | 'stage' | 'createdAt'>) => string;
@@ -103,8 +131,23 @@ interface Ctx {
   confirmReceived: (orderId: string) => void; rateOrder: (orderId: string, r: { supplier: number; rider: number }) => void;
   advanceOrder: (id: string) => void; advanceCourier: (id: string) => void;
   toggleFavorite: (productId: string) => void; openSupplierChat: (supplierId: string) => string;
+  toggleFollow: (supplierId: string) => void;
   sendMessage: (chatId: string, text: string, imageUri?: string) => void;
   markChatRead: (chatId: string) => void; markNotificationsRead: () => void;
+  redeemPoints: (cost: number, title: string) => boolean;
+  requestReturn: (orderId: string, reason: string, photoUri?: string) => void;
+  respondReturn: (orderId: string, approve: boolean) => void;
+  bookReturnPickup: (orderId: string, payer: 'buyer' | 'supplier') => void;
+  createChama: (productId: string, payMode: 'pre' | 'post') => string;
+  addChamaMember: (chamaId: string, m: Omit<ChamaMember, 'id' | 'paid'>) => void;
+  removeChamaMember: (chamaId: string, memberId: string) => void;
+  setChamaPayer: (chamaId: string, memberId: string) => void;
+  markMemberPaid: (chamaId: string, memberId: string) => void;
+  placeChamaOrder: (chamaId: string, address: Address) => void;
+  addErrand: (typeId: string, details: string, photoUri?: string) => string;
+  advanceErrand: (id: string) => void;
+  requestRestock: (productId: string, qty: number) => string;
+  advanceRestock: (id: string) => void;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -140,6 +183,8 @@ const advance = (o: Order): Order => {
     deliveryPaid: stage === DELIVERED ? true : o.deliveryPaid, events: [...o.events, { id: uid(), at: Date.now(), ...ev }],
   };
 };
+/** Points earned on delivery: roughly 1 point per KSh 100 spent, plus a flat bonus. */
+const pointsFor = (order: Order) => Math.round(order.price / 100) + 5;
 
 /* ═════════ Seed data ═════════ */
 const now = Date.now();
@@ -152,7 +197,7 @@ const SEED_ADDRESSES: Address[] = [
 ];
 const SEED_PAY: PayNumber[] = [{ id: 'p1', number: '0712345678', isDefault: true }];
 const SEED_REQUESTS: GekelRequest[] = [
-  { id: 'r1', title: 'Black hoodie under KSh 2,000', category: 'Clothing', budget: 2000, urgency: 'standard', stage: 1, createdAt: now - 3 * H },
+  { id: 'r1', title: 'Black hoodie under KSh 2,000', category: 'mavazi', budget: 2000, urgency: 'standard', stage: 1, createdAt: now - 3 * H },
 ];
 const courierSeedEvents = courierScript('FARGO').map((text, i) => ({ id: `ce${i}`, at: now - (48 - i * 6) * H, text }));
 const SEED_ORDERS: Order[] = [
@@ -198,6 +243,7 @@ const SEED_CHATS: ChatThread[] = [
 
 /* ═════════ Provider ═════════ */
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
+  const { isOffline, queueMessage } = useOffline();
   const [requests, setRequests] = useState(SEED_REQUESTS);
   const [orders, setOrders] = useState(SEED_ORDERS);
   const [chats, setChats] = useState(SEED_CHATS);
@@ -210,6 +256,13 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [locationDenied, setLocationDenied] = useState(false);
   const [unreadNotifications, setUnread] = useState(2);
   const [resellerMode, setResellerMode] = useState(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>(NOTIFICATIONS);
+  const [following, setFollowing] = useState<string[]>([]);
+  const [points, setPoints] = useState(240); // starter balance so the redeem screen has something to show
+  const [chamas, setChamas] = useState<ChamaOrder[]>([]);
+  const [errands, setErrands] = useState<ErrandRequest[]>([]);
+  const [restockJobs, setRestockJobs] = useState<RestockJob[]>([]);
+  const [shelf, setShelf] = useState<ShelfInfo>({ capacityUnits: 200, stock: {} });
 
   const post = useCallback((chatId: string, msg: Omit<Message, 'id' | 'at'>, supplier?: Supplier) => {
     const m: Message = { id: uid(), at: Date.now(), ...msg };
@@ -325,7 +378,12 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => confirmPaid(orderId, chatId), 1800); // TODO: POST /orders/:id/payment-proof
   }, [post]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const advanceOrder = useCallback((id: string) => setOrders((p) => p.map((o) => (o.id === id ? advance(o) : o))), []);
+  const advanceOrder = useCallback((id: string) => setOrders((p) => p.map((o) => {
+    if (o.id !== id) return o;
+    const next = advance(o);
+    if (next.stage === DELIVERED && o.stage !== DELIVERED) setPoints((pts) => pts + pointsFor(next));
+    return next;
+  })), []);
   const advanceCourier = useCallback((id: string) => setOrders((p) => p.map((o) => {
     if (o.id !== id || !o.courier) return o;
     const script = courierScript(o.address.split(',').slice(-2)[0]?.trim() || 'your town');
@@ -335,7 +393,9 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   })), []);
   const confirmReceived = useCallback((id: string) => setOrders((p) => p.map((o) => {
     if (o.id !== id || o.stage >= DELIVERED) return o;
-    return { ...advance(o), events: [...o.events, { id: uid(), at: Date.now(), title: 'Delivered', note: 'Confirmed received by you', photo: 'delivery' as const }] };
+    const next = { ...advance(o), events: [...advance(o).events] };
+    setPoints((pts) => pts + pointsFor(next));
+    return next;
   })), []);
   const rateOrder = useCallback((id: string, r: { supplier: number; rider: number }) => setOrders((p) => p.map((o) => (o.id === id ? { ...o, rating: r } : o))), []); // TODO: POST /ratings
 
@@ -345,22 +405,131 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     setChats((p) => (p.some((c) => c.id === id) ? p : [supplierThread(s, [{ id: uid(), from: 'them', text: `Hi! This is ${s.name}. How can we help?`, at: Date.now() }]), ...p]));
     return id;
   }, []);
+
+  /* follow a supplier -> gets a Home/Notifications ping when they add something new (mocked for now) */
+  const toggleFollow = useCallback((supplierId: string) => {
+    const nowFollowing = !following.includes(supplierId);
+    setFollowing((p) => (nowFollowing ? [...p, supplierId] : p.filter((x) => x !== supplierId)));
+    if (nowFollowing) {
+      const s = sup(supplierId);
+      // TODO: this becomes a real push notification once suppliers can list new items from their own app.
+      setTimeout(() => {
+        setNotifications((p) => [{ id: uid(), icon: 'storefront', title: `New from ${s.name}`, body: `${s.name} just listed something new. Tap to see their catalogue.`, time: 'just now' }, ...p]);
+        setUnread((n) => n + 1);
+      }, 2500);
+    }
+  }, [following]);
+
   const sendMessage = useCallback((chatId: string, text: string, imageUri?: string) => {
     post(chatId, { from: 'me', text, imageUri });
+    if (isOffline) { queueMessage(chatId, text); return; } // no reply comes until we're back online
     setTimeout(() => post(chatId, { from: 'them', text: replyFor(text) }), 1400); // TODO: websocket / push
-  }, [post]);
+  }, [post, isOffline, queueMessage]);
   const markChatRead = useCallback((chatId: string) => setChats((p) => p.map((c) => (c.id === chatId && c.unread ? { ...c, unread: 0 } : c))), []);
   const markNotificationsRead = useCallback(() => setUnread(0), []);
 
+  /* GEKEL Points */
+  const redeemPoints: Ctx['redeemPoints'] = useCallback((cost) => {
+    let ok = false;
+    setPoints((p) => { if (p >= cost) { ok = true; return p - cost; } return p; });
+    return ok; // TODO: POST /points/redeem once rewards are fulfilled server-side
+  }, []);
+
+  /* Returns: discuss with the supplier first, then book a pickup once they agree */
+  const requestReturn: Ctx['requestReturn'] = useCallback((orderId, reason, photoUri) => {
+    setOrders((p) => p.map((o) => (o.id === orderId ? { ...o, returnRequest: { reason, photoUri, status: 'requested', at: Date.now() } } : o)));
+    setOrders((p) => {
+      const o = p.find((x) => x.id === orderId);
+      if (o) post(o.chatId, { from: 'me', text: `I'd like to return my order. Reason: ${reason}${photoUri ? ' (photo attached)' : ''}` });
+      return p;
+    });
+    setTimeout(() => setOrders((p) => p.map((o) => (o.id === orderId ? { ...o, returnRequest: o.returnRequest ? { ...o.returnRequest, status: 'discussing' } : o.returnRequest } : o))), 800);
+  }, [post]);
+  const respondReturn: Ctx['respondReturn'] = useCallback((orderId, approve) => {
+    setOrders((p) => p.map((o) => (o.id === orderId && o.returnRequest ? { ...o, returnRequest: { ...o.returnRequest, status: approve ? 'approved' : 'declined' } } : o)));
+    setOrders((p) => {
+      const o = p.find((x) => x.id === orderId);
+      if (o) post(o.chatId, { from: 'them', text: approve ? 'Agreed, go ahead and request a pickup.' : 'Sorry, we cannot accept this return.' });
+      return p;
+    });
+  }, [post]);
+  const bookReturnPickup: Ctx['bookReturnPickup'] = useCallback((orderId, payer) => {
+    setOrders((p) => p.map((o) => (o.id === orderId && o.returnRequest ? { ...o, returnRequest: { ...o.returnRequest, status: 'pickup_booked', payer } } : o)));
+    // TODO: POST /returns — create an actual reverse-pickup job for a rider or Sacco/courier if the buyer is far from Nairobi.
+  }, []);
+
+  /* Chama Buy */
+  const createChama: Ctx['createChama'] = useCallback((productId, payMode) => {
+    const p0 = PRODUCTS.find((x) => x.id === productId)!;
+    const id = uid();
+    setChamas((p) => [{ id, productId, targetQty: p0.wholesale?.minQty ?? 1, unitPrice: p0.wholesale?.unitPrice ?? p0.price, payMode, members: [], status: 'collecting', createdAt: Date.now() }, ...p]);
+    return id;
+  }, []);
+  const addChamaMember: Ctx['addChamaMember'] = useCallback((chamaId, m) => {
+    setChamas((p) => p.map((c) => {
+      if (c.id !== chamaId) return c;
+      const members = [...c.members, { ...m, id: uid(), paid: false }];
+      const have = members.reduce((n, x) => n + x.qty, 0);
+      return { ...c, members, status: have >= c.targetQty ? 'ready' : 'collecting' };
+    }));
+  }, []);
+  const removeChamaMember: Ctx['removeChamaMember'] = useCallback((chamaId, memberId) => {
+    setChamas((p) => p.map((c) => (c.id === chamaId ? { ...c, members: c.members.filter((m) => m.id !== memberId) } : c)));
+  }, []);
+  const setChamaPayer: Ctx['setChamaPayer'] = useCallback((chamaId, memberId) => {
+    setChamas((p) => p.map((c) => (c.id === chamaId ? { ...c, payerMemberId: memberId } : c)));
+  }, []);
+  const markMemberPaid: Ctx['markMemberPaid'] = useCallback((chamaId, memberId) => {
+    setChamas((p) => p.map((c) => (c.id === chamaId ? { ...c, members: c.members.map((m) => (m.id === memberId ? { ...m, paid: true } : m)) } : c)));
+  }, []);
+  const placeChamaOrder: Ctx['placeChamaOrder'] = useCallback((chamaId, address) => {
+    setChamas((prev) => {
+      const c = prev.find((x) => x.id === chamaId);
+      if (!c) return prev;
+      const qty = c.members.reduce((n, m) => n + m.qty, 0);
+      const r = placeBundle({ lines: [{ productId: c.productId, qty }], address, delivery: { method: 'rider', speed: 'standard', dest: 'door', pay: 'later' } });
+      return prev.map((x) => (x.id === chamaId ? { ...x, status: 'ordered', orderId: r.orderIds[0] } : x));
+    });
+  }, [placeBundle]);
+
+  /* Gekel Errands */
+  const addErrand: Ctx['addErrand'] = useCallback((typeId, details, photoUri) => {
+    const id = uid();
+    setErrands((p) => [{ id, typeId, details, photoUri, stage: 0, createdAt: Date.now() }, ...p]);
+    setTimeout(() => setErrands((p) => p.map((e) => (e.id === id && e.stage === 0 ? { ...e, stage: 1 } : e))), 2000); // TODO: POST /errands
+    return id;
+  }, []);
+  const advanceErrand = useCallback((id: string) => setErrands((p) => p.map((e) => (e.id === id ? { ...e, stage: Math.min(ERRAND_STAGES.length - 1, e.stage + 1) } : e))), []);
+
+  /* Rent-a-Shelf: restock from a wholesaler into GEKEL's sorting-centre shelves */
+  const requestRestock: Ctx['requestRestock'] = useCallback((productId, qty) => {
+    const p0 = PRODUCTS.find((x) => x.id === productId)!;
+    const id = uid();
+    setRestockJobs((p) => [{ id, productId, qty, supplierId: p0.supplierId, stage: 0, createdAt: Date.now() }, ...p]);
+    return id; // TODO: POST /restock. Stages advance here with timers for the demo; __DEV__ buttons do it below.
+  }, []);
+  const advanceRestock = useCallback((id: string) => setRestockJobs((p) => p.map((j) => {
+    if (j.id !== id) return j;
+    const stage = Math.min(RESTOCK_STAGES.length - 1, j.stage + 1);
+    if (stage === RESTOCK_STAGES.length - 1 && j.stage !== stage) setShelf((s) => ({ ...s, stock: { ...s.stock, [j.productId]: (s.stock[j.productId] ?? 0) + j.qty } }));
+    return { ...j, stage };
+  })), []);
+
   const value = useMemo<Ctx>(() => ({
-    requests, orders, chats, favorites, cart, addresses, defaultAddress, payNumbers, avatarUri, userCoords, locationDenied, unreadNotifications, resellerMode,
+    requests, orders, chats, favorites, cart, addresses, defaultAddress, payNumbers, avatarUri, userCoords, locationDenied, notifications, unreadNotifications, resellerMode, following, points,
+    chamas, errands, restockJobs, shelf,
     setResellerMode, setAvatarUri, requestLocation, addRequest, cancelRequest, advanceRequest, addToCart, setCartQty, removeFromCart, toggleCartSelect, selectAllCart, clearOrdered,
     addAddress, updateAddress, deleteAddress, setDefaultAddress, addPayNumber, removePayNumber, setDefaultPay, placeBundle, respondQuote, payWithPrompt, attachPayment,
-    confirmReceived, rateOrder, advanceOrder, advanceCourier, toggleFavorite, openSupplierChat, sendMessage, markChatRead, markNotificationsRead,
-  }), [requests, orders, chats, favorites, cart, addresses, defaultAddress, payNumbers, avatarUri, userCoords, locationDenied, unreadNotifications, resellerMode,
+    confirmReceived, rateOrder, advanceOrder, advanceCourier, toggleFavorite, openSupplierChat, toggleFollow, sendMessage, markChatRead, markNotificationsRead, redeemPoints,
+    requestReturn, respondReturn, bookReturnPickup, createChama, addChamaMember, removeChamaMember, setChamaPayer, markMemberPaid, placeChamaOrder, addErrand, advanceErrand,
+    requestRestock, advanceRestock,
+  }), [requests, orders, chats, favorites, cart, addresses, defaultAddress, payNumbers, avatarUri, userCoords, locationDenied, notifications, unreadNotifications, resellerMode, following, points,
+    chamas, errands, restockJobs, shelf,
     requestLocation, addRequest, cancelRequest, advanceRequest, addToCart, setCartQty, removeFromCart, toggleCartSelect, selectAllCart, clearOrdered, addAddress, updateAddress,
     deleteAddress, setDefaultAddress, addPayNumber, removePayNumber, setDefaultPay, placeBundle, respondQuote, payWithPrompt, attachPayment, confirmReceived, rateOrder,
-    advanceOrder, advanceCourier, toggleFavorite, openSupplierChat, sendMessage, markChatRead, markNotificationsRead]);
+    advanceOrder, advanceCourier, toggleFavorite, openSupplierChat, toggleFollow, sendMessage, markChatRead, markNotificationsRead, redeemPoints,
+    requestReturn, respondReturn, bookReturnPickup, createChama, addChamaMember, removeChamaMember, setChamaPayer, markMemberPaid, placeChamaOrder, addErrand, advanceErrand,
+    requestRestock, advanceRestock]);
 
   return <AppData.Provider value={value}>{children}</AppData.Provider>;
 }

@@ -25,7 +25,7 @@ export function MiniTimer({ endsAt }: { endsAt: number }) {
   const { label, ended } = useCountdown(endsAt);
   if (ended) return null;
   return (
-    <View className="absolute bottom-2 left-2 flex-row items-center rounded-full bg-ink/80 px-2 py-1">
+    <View className="absolute bottom-2 left-2 flex-row items-center rounded-full bg-ink-80 px-2 py-1">
       <Ionicons name="flash" size={10} color="#FFB020" />
       <Text className="ml-1 text-[10px] font-bold text-white">{label}</Text>
     </View>

@@ -8,7 +8,7 @@ import Timeline from '../../components/Timeline';
 import EmptyState from '../../components/EmptyState';
 import ProductImage from '../../components/ProductImage';
 import { useAppData, requestStatus, requestNote } from '../../context/AppDataContext';
-import { PRODUCTS, REQUEST_STAGES, formatKsh } from '../../data/mock';
+import { PRODUCTS, REQUEST_STAGES, categoryName, formatKsh } from '../../data/mock';
 import { useNav } from '../../hooks/useNav';
 import type { RootStackParamList } from '../../types/navigation';
 
@@ -48,7 +48,7 @@ export default function RequestDetailScreen() {
       <Text className="mt-1 text-sm text-ink-soft">{requestNote(r)}</Text>
 
       <View className="mt-4 flex-row flex-wrap gap-2">
-        {r.category && <Meta label={r.category} />}
+        {r.category && <Meta label={categoryName(r.category)} />}
         {r.budget ? <Meta label={`Budget ${formatKsh(r.budget)}`} /> : null}
         <Meta label={r.urgency === 'sameDay' ? 'Same day' : 'Within 3 days'} />
       </View>

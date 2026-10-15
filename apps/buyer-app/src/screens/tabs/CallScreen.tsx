@@ -31,8 +31,8 @@ export default function CallScreen() {
 
   const Ctl = ({ icon, label, on, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; on?: boolean; onPress: () => void }) => (
     <View className="items-center">
-      <Pressable onPress={onPress} accessibilityLabel={label} className={`h-16 w-16 items-center justify-center rounded-full ${on ? 'bg-white' : 'bg-white/15'}`}><Ionicons name={icon} size={26} color={on ? '#1C1917' : '#fff'} /></Pressable>
-      <Text className="mt-2 text-xs text-white/80">{label}</Text>
+      <Pressable onPress={onPress} accessibilityLabel={label} className={`h-16 w-16 items-center justify-center rounded-full ${on ? 'bg-white' : 'bg-white-15'}`}><Ionicons name={icon} size={26} color={on ? '#1C1917' : '#fff'} /></Pressable>
+      <Text className="mt-2 text-xs text-white-80">{label}</Text>
     </View>
   );
 
@@ -43,14 +43,14 @@ export default function CallScreen() {
         <View className="items-center pt-10">
           <View className="h-28 w-28 items-center justify-center rounded-full bg-brand-500"><Text className="text-5xl font-bold text-white">{name.charAt(0)}</Text></View>
           <Text className="mt-5 text-3xl font-extrabold text-white">{name}</Text>
-          {role ? <Text className="mt-1 text-base text-white/70">{role}</Text> : null}
+          {role ? <Text className="mt-1 text-base text-white-70">{role}</Text> : null}
           <Text className="mt-5 text-lg font-semibold text-white">
             {phase === 'calling' ? 'Calling…' : phase === 'ended' ? 'Call ended' : mmss(secs)}
           </Text>
           {phase === 'connected' && (
             <View className="mt-4 w-56">
-              <View className="h-1.5 overflow-hidden rounded-full bg-white/20"><View style={{ width: `${(secs / limitSeconds) * 100}%` }} className={`h-full rounded-full ${warn ? 'bg-red-400' : 'bg-brand-400'}`} /></View>
-              <Text className={`mt-2 text-center text-xs ${warn ? 'text-red-300' : 'text-white/60'}`}>{warn ? `Call ends in ${remaining}s` : `Time left ${mmss(remaining)}`}</Text>
+              <View className="h-1.5 overflow-hidden rounded-full bg-white-20"><View style={{ width: `${(secs / limitSeconds) * 100}%` }} className={`h-full rounded-full ${warn ? 'bg-red-400' : 'bg-brand-400'}`} /></View>
+              <Text className={`mt-2 text-center text-xs ${warn ? 'text-red-300' : 'text-white-60'}`}>{warn ? `Call ends in ${remaining}s` : `Time left ${mmss(remaining)}`}</Text>
             </View>
           )}
         </View>
@@ -61,7 +61,7 @@ export default function CallScreen() {
             <Ctl icon="volume-high" label="Speaker" on={speaker} onPress={() => setSpeaker((s) => !s)} />
           </View>
           <Pressable onPress={() => setPhase('ended')} accessibilityLabel="End call" className="h-16 w-16 items-center justify-center self-center rounded-full bg-red-500"><Ionicons name="call" size={28} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} /></Pressable>
-          <Text className="mt-6 text-center text-xs leading-5 text-white/50">Calls are limited to {Math.round(limitSeconds / 60)} minutes and go through GEKEL, so your number stays private.</Text>
+          <Text className="mt-6 text-center text-xs leading-5 text-white-50">Calls are limited to {Math.round(limitSeconds / 60)} minutes and go through GEKEL, so your number stays private.</Text>
         </View>
       </SafeAreaView>
     </View>

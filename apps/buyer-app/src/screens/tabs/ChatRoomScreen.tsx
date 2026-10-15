@@ -19,6 +19,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import Button from "../../components/Button";
 import OnlineStatus from "../../components/OnlineStatus";
 import { Message, Order, useAppData } from "../../context/AppDataContext";
+import { useOffline } from "../../context/OfflineContext";
 import { formatKsh } from "../../data/mock";
 import { isKenyanPhone } from "../../utils/validation";
 import { useNav } from "../../hooks/useNav";
@@ -152,7 +153,7 @@ function PayCard({
                 <Pressable
                   key={k}
                   onPress={() => setTab(k)}
-                  className={`h-9 flex-1 items-center justify-center rounded-full ${tab === k ? "bg-white" : ""}`}
+                  className={`h-9 flex-1 items-center justify-center rounded-full ${tab === k ? "bg-white " : ""}`}
                 >
                   <Text
                     className={`text-sm font-bold ${tab === k ? "text-ink" : "text-ink-mute"}`}
@@ -234,6 +235,7 @@ export default function ChatRoomScreen() {
   const { id } = useRoute<RouteProp<RootStackParamList, "ChatRoom">>().params;
   const { chats, orders, sendMessage, markChatRead, attachPayment } =
     useAppData();
+  const { outbox } = useOffline();
   const chat = chats.find((c) => c.id === id);
   const pending = orders.find(
     (o) =>
@@ -298,7 +300,7 @@ export default function ChatRoomScreen() {
         <View className="mb-3 max-w-[86%] self-end overflow-hidden rounded-2xl rounded-br-sm bg-brand-500">
           <View className="flex-row items-center px-4 pt-2.5">
             <Ionicons name="receipt" size={14} color="#fff" />
-            <Text className="ml-1.5 text-xs font-bold tracking-widest text-white/90">
+            <Text className="ml-1.5 text-xs font-bold tracking-widest text-white-90">
               PAYMENT PROOF
             </Text>
           </View>
@@ -313,9 +315,17 @@ export default function ChatRoomScreen() {
         </View>
       );
     }
+    const queued =
+      mine &&
+      outbox.some(
+        (o) =>
+          o.chatId === id &&
+          o.text === m.text &&
+          Math.abs(o.createdAt - m.at) < 2000,
+      );
     return (
       <View
-        className={`mb-2 max-w-[80%] overflow-hidden rounded-2xl ${mine ? "self-end rounded-br-sm bg-brand-500" : "self-start rounded-bl-sm border border-line bg-white"}`}
+        className={`mb-2 max-w-[80%] overflow-hidden rounded-2xl ${mine ? "self-end rounded-br-sm bg-brand-500" : "self-start rounded-bl-sm border border-line dark:border-surface-line bg-white dark:bg-surface"}`}
       >
         {m.imageUri ? (
           <Image
@@ -326,11 +336,23 @@ export default function ChatRoomScreen() {
         ) : null}
         {m.text && !(m.imageUri && m.text === "Photo") ? (
           <Text
-            className={`px-4 py-2.5 text-base ${mine ? "text-white" : "text-ink"}`}
+            className={`px-4 pt-2.5 text-base ${queued ? "" : "pb-2.5"} ${mine ? "text-white" : "text-ink dark:text-sink"}`}
           >
             {m.text}
           </Text>
         ) : null}
+        {queued && (
+          <View className="flex-row items-center justify-end px-4 pb-2 pt-0.5">
+            <Ionicons
+              name="time-outline"
+              size={11}
+              color="rgba(255,255,255,0.8)"
+            />
+            <Text className="ml-1 text-[10px] font-medium text-white-80">
+              Waiting to send
+            </Text>
+          </View>
+        )}
       </View>
     );
   };
@@ -472,7 +494,7 @@ export default function ChatRoomScreen() {
         onRequestClose={() => setSheet(false)}
       >
         <KeyboardAvoidingView
-          className="flex-1 justify-end bg-black/40"
+          className="flex-1 justify-end bg-black-40"
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <Pressable className="flex-1" onPress={() => setSheet(false)} />
@@ -506,7 +528,7 @@ export default function ChatRoomScreen() {
                 />
                 <Pressable
                   onPress={() => setProofImg(undefined)}
-                  className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-black/60"
+                  className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-black-60"
                 >
                   <Ionicons name="close" size={18} color="#fff" />
                 </Pressable>

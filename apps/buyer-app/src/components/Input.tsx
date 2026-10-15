@@ -17,18 +17,18 @@ const Input = forwardRef<TextInput, Props>(function Input(
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
 
-  const border = error ? 'border-danger' : focused ? 'border-brand-500' : 'border-line';
+  const border = error ? 'border-danger' : focused ? 'border-brand-500' : 'border-line dark:border-surface-line';
 
   return (
     <View className="mb-4">
-      <Text className="mb-1.5 text-sm font-medium text-ink">{label}</Text>
-      <View className={`h-14 flex-row items-center rounded-2xl border bg-white px-4 ${border}`}>
+      <Text className="mb-1.5 text-sm font-medium text-ink dark:text-sink">{label}</Text>
+      <View className={`h-14 flex-row items-center rounded-2xl border bg-white dark:bg-surface px-4 ${border}`}>
         {icon && (
           <Ionicons name={icon} size={20} color={focused ? '#F44236' : '#A8A29E'} style={{ marginRight: 10 }} />
         )}
         <TextInput
           ref={ref}
-          className="flex-1 text-base text-ink"
+          className="flex-1 text-base text-ink dark:text-sink"
           placeholderTextColor="#A8A29E"
           secureTextEntry={secure && hidden}
           autoCapitalize="none"
@@ -57,7 +57,7 @@ const Input = forwardRef<TextInput, Props>(function Input(
       {error ? (
         <Text className="mt-1.5 text-sm text-danger">{error}</Text>
       ) : hint ? (
-        <Text className="mt-1.5 text-sm text-ink-mute">{hint}</Text>
+        <Text className="mt-1.5 text-sm text-ink-mute dark:text-sink-mute">{hint}</Text>
       ) : null}
     </View>
   );

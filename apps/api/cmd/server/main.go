@@ -1,113 +1,118 @@
+// Command server runs the GEKEL Finds API.
 package main
 
 import (
 	"context"
-	"encoding/json"
-	"log"
+	"errors"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
-	"github.com/geofreysakayo/gekel-finds/internal/database"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
+
+	"github.com/geofreysakayo/gekel-finds-auth/internal/auth"
+	"github.com/geofreysakayo/gekel-finds-auth/internal/config"
+	"github.com/geofreysakayo/gekel-finds-auth/internal/httpx"
+	"github.com/geofreysakayo/gekel-finds-auth/internal/server"
+	"github.com/geofreysakayo/gekel-finds-auth/internal/users"
 )
 
 func main() {
-	port := os.Getenv("API_PORT")
-	if port == "" {
-		port = "8080"
+	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	if err := run(log); err != nil {
+		log.Error("fatal", "err", err)
+		os.Exit(1)
 	}
+}
 
-	databaseURL := os.Getenv("DATABASE_URL")
-	if databaseURL == "" {
-		log.Fatal("DATABASE_URL is required")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	dbPool, err := database.NewPostgresPool(ctx, databaseURL)
+func run(log *slog.Logger) error {
+	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("database connection failed: %v", err)
+		return err
 	}
-	defer dbPool.Close()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":  "ok",
-			"service": "gekel-api",
-		})
-	})
-
-	mux.HandleFunc("/health/db", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
-		defer cancel()
-
-		if err := dbPool.Ping(ctx); err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusServiceUnavailable)
-			json.NewEncoder(w).Encode(map[string]string{
-				"status":   "error",
-				"database": "unavailable",
-			})
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":   "ok",
-			"database": "connected",
-		})
-	})
-
-	server := &http.Server{
-		Addr:              ":" + port,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
+	/* Postgres */
+	pcfg, err := pgxpool.ParseConfig(cfg.DatabaseURL)
+	if err != nil {
+		return err
+	}
+	pcfg.MaxConns, pcfg.MinConns = 20, 2
+	pcfg.MaxConnLifetime, pcfg.HealthCheckPeriod = time.Hour, time.Minute
+	db, err := pgxpool.NewWithConfig(ctx, pcfg)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	if err = db.Ping(ctx); err != nil {
+		return err
 	}
 
+	/* Redis */
+	ropt, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		return err
+	}
+	ropt.DialTimeout, ropt.ReadTimeout, ropt.WriteTimeout = 3*time.Second, 2*time.Second, 2*time.Second
+	rdb := redis.NewClient(ropt)
+	defer rdb.Close()
+	if err = rdb.Ping(ctx).Err(); err != nil {
+		return err
+	}
+
+	/* Services */
+	hasher, err := auth.NewHasher(max(2, runtime.NumCPU()))
+	if err != nil {
+		return err
+	}
+	var notify auth.Notifier = auth.ConsoleNotifier{Log: log}
+	if cfg.ATUsername != "" {
+		notify = auth.AfricasTalking{Username: cfg.ATUsername, APIKey: cfg.ATAPIKey, Sender: cfg.ATSender, Sandbox: cfg.ATSandbox}
+	} else if cfg.IsProd() {
+		return errors.New("refusing to start in production without an SMS provider")
+	}
+
+	limiter := httpx.NewLimiter(rdb, cfg.RateLimitFailClosed)
+	tokens := auth.NewTokenManager(cfg.JWTSecret, cfg.JWTIssuer, cfg.JWTAudience, cfg.AccessTTL)
+	svc := auth.Service{
+		Store: auth.Store{DB: db}, RDB: rdb, Tokens: tokens, Hasher: hasher, Limiter: limiter, Log: log,
+		OTP:        auth.OTP{RDB: rdb, Secret: []byte(cfg.OTPSecret), TTL: cfg.OTPTTL, MaxAttempts: 5},
+		Notify:     notify,
+		RefreshTTL: cfg.RefreshTTL, ResetTTL: cfg.ResetTokenTTL,
+	}
+	ah := auth.Handler{Svc: svc, Log: log, Trusted: cfg.TrustedProxies}
+
+	handler := server.Router(server.Deps{
+		Cfg: cfg, Log: log, DB: db, RDB: rdb, Auth: ah, Users: users.Handler{Auth: ah},
+		Authn: auth.Authenticator{Tokens: tokens, RDB: rdb}, Limiter: limiter,
+	})
+
+	srv := &http.Server{
+		Addr: ":" + cfg.Port, Handler: handler,
+		ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 20 * time.Second,
+		IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 << 10,
+	}
+	errCh := make(chan error, 1)
 	go func() {
-		log.Printf("Gekel API listening on port %s", port)
-		log.Printf("Health check: http://localhost:%s/health", port)
-		log.Printf("Database check: http://localhost:%s/health/db", port)
-
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("server failed: %v", err)
+		log.Info("api listening", "port", cfg.Port, "env", cfg.Env, "swagger", cfg.SwaggerEnabled)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- err
 		}
 	}()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-
-	<-stop
-
-	log.Println("Shutting down Gekel API...")
-
-	shutdownCtx, shutdownCancel := context.WithTimeout(
-		context.Background(),
-		10*time.Second,
-	)
-	defer shutdownCancel()
-
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Printf("server shutdown error: %v", err)
+	select {
+	case err = <-errCh:
+		return err
+	case <-ctx.Done():
+		log.Info("shutting down")
 	}
-
-	log.Println("Gekel API stopped")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	return srv.Shutdown(shutdownCtx)
 }

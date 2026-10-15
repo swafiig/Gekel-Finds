@@ -25,10 +25,10 @@ export default function BundleScreen() {
     <Screen scroll>
       <BackHeader title="Your combined order" onBack={() => nav.popToTop()} />
       <View className="mt-4 rounded-2xl bg-ink p-5">
-        <Text className="text-sm text-white/70">Shops paid</Text>
-        <Text className="mt-1 text-4xl font-extrabold text-white">{paid} <Text className="text-xl text-white/60">of {live.length}</Text></Text>
-        <View className="mt-3 h-2 overflow-hidden rounded-full bg-white/20"><View style={{ width: `${live.length ? (paid / live.length) * 100 : 0}%` }} className="h-full rounded-full bg-brand-500" /></View>
-        <Text className="mt-3 text-sm text-white/80">One rider collects from every shop once all are packed.</Text>
+        <Text className="text-sm text-white-70">Shops paid</Text>
+        <Text className="mt-1 text-4xl font-extrabold text-white">{paid} <Text className="text-xl text-white-60">of {live.length}</Text></Text>
+        <View className="mt-3 h-2 overflow-hidden rounded-full bg-white-20"><View style={{ width: `${live.length ? (paid / live.length) * 100 : 0}%` }} className="h-full rounded-full bg-brand-500" /></View>
+        <Text className="mt-3 text-sm text-white-80">One rider collects from every shop once all are packed.</Text>
       </View>
 
       <Text className="mb-3 mt-6 text-lg font-extrabold text-ink">Shops</Text>
@@ -37,7 +37,7 @@ export default function BundleScreen() {
         const names = o.items.map((i) => `${i.qty} × ${PRODUCTS.find((p) => p.id === i.productId)!.name}`).join(', ');
         const status = o.cancelled ? ['Cancelled', 'bg-stone-200 text-stone-600'] : o.quote === 'pending' ? ['Waiting for shop', 'bg-amber-50 text-amber-700'] : o.stage === 0 ? ['Pay now', 'bg-brand-50 text-brand-600'] : ['Paid · ' + orderStages(o)[o.stage], 'bg-green-100 text-success'];
         return (
-          <View key={o.id} className="mb-3 rounded-2xl border border-line bg-white p-4">
+          <View key={o.id} className="mb-3 rounded-2xl border border-line dark:border-surface-line bg-white dark:bg-surface p-4">
             <View className="flex-row items-center justify-between">
               <Text className="flex-1 pr-2 text-base font-bold text-ink">{s.name}</Text>
               <View className={`rounded-md px-2 py-1 ${status[1].split(' ')[0]}`}><Text className={`text-xs font-bold ${status[1].split(' ')[1]}`}>{status[0]}</Text></View>

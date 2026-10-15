@@ -1,30 +1,31 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApi, User } from '../services/authApi';
+import { usersApi } from '../services/usersApi';
+import { ApiError, setAccessToken, setSessionExpiredHandler } from '../services/http';
 
 type Status = 'loading' | 'onboarding' | 'signedOut' | 'signedIn';
-export type SignupIntent = 'buyer' | 'supplier';
-
-interface RegisterInput {
-  name: string;
-  phone: string;
-  email?: string;
-  password: string;
-}
+interface RegisterInput { name: string; phone: string; email?: string; password: string }
 
 interface AuthContextValue {
   status: Status;
   user: User | null;
-  signupIntent: SignupIntent;
-  setSignupIntent: (i: SignupIntent) => void;
+  /** Shown once on the login screen after a forced sign-out (e.g. "Your session expired"). */
+  notice: string | null;
+  clearNotice: () => void;
+  /** True right after signup so the app can open the phone-verification screen once. */
+  justRegistered: boolean;
+  clearJustRegistered: () => void;
   completeOnboarding: () => Promise<void>;
   login: (identifier: string, password: string) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
-  updateAvatar: (uri: string) => Promise<void>;
+  logoutAll: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  updateProfile: (patch: { name?: string; email?: string }) => Promise<void>;
 }
 
-const KEYS = { onboarded: 'gekel.onboarded', token: 'gekel.token', user: 'gekel.user' };
+const ONBOARDED_KEY = 'gekel.onboarded';
 const MIN_SPLASH_MS = 2200;
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -32,72 +33,78 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>('loading');
   const [user, setUser] = useState<User | null>(null);
-  const [signupIntent, setSignupIntent] = useState<SignupIntent>('buyer');
+  const [notice, setNotice] = useState<string | null>(null);
+  const [justRegistered, setJustRegistered] = useState(false);
 
-  // Bootstrap: read persisted session, but never show the splash for less than MIN_SPLASH_MS
+  const signOutLocally = useCallback((message?: string) => {
+    setAccessToken(null);
+    setUser(null);
+    setStatus('signedOut');
+    if (message) setNotice(message);
+  }, []);
+
+  // The HTTP layer calls this when a refresh token is rejected (expired, revoked, or reuse detected).
+  useEffect(() => {
+    setSessionExpiredHandler(() => signOutLocally('Your session has expired. Please sign in again.'));
+    return () => setSessionExpiredHandler(null);
+  }, [signOutLocally]);
+
+  // Restore the session at launch. The splash stays up for at least MIN_SPLASH_MS.
   useEffect(() => {
     (async () => {
-      const [stored] = await Promise.all([
-        AsyncStorage.multiGet([KEYS.onboarded, KEYS.token, KEYS.user]),
-        new Promise((r) => setTimeout(r, MIN_SPLASH_MS)),
-      ]);
-      const map = Object.fromEntries(stored);
-      if (map[KEYS.token] && map[KEYS.user]) {
-        // TODO: validate / refresh the token with the backend here
-        setUser(JSON.parse(map[KEYS.user] as string));
-        setStatus('signedIn');
-      } else {
-        setStatus(map[KEYS.onboarded] ? 'signedOut' : 'onboarding');
+      const wait = new Promise((r) => setTimeout(r, MIN_SPLASH_MS));
+      const onboarded = (await AsyncStorage.getItem(ONBOARDED_KEY)) === '1';
+      let restored: User | null = null;
+      let serverDown = false;
+      try {
+        restored = await authApi.restore();
+      } catch (e) {
+        serverDown = e instanceof ApiError; // offline or server trouble: tokens are kept for next launch
+      }
+      await wait;
+      if (restored) { setUser(restored); setStatus('signedIn'); }
+      else {
+        setStatus(onboarded ? 'signedOut' : 'onboarding');
+        if (serverDown) setNotice('We could not reach the server. Check your connection and sign in again.');
       }
     })();
   }, []);
 
-  const persistSession = async (token: string, u: User) => {
-    // TODO: use expo-secure-store for the token in production
-    await AsyncStorage.multiSet([
-      [KEYS.token, token],
-      [KEYS.user, JSON.stringify(u)],
-    ]);
-    setUser(u);
-    setStatus('signedIn');
-  };
-
   const completeOnboarding = useCallback(async () => {
-    await AsyncStorage.setItem(KEYS.onboarded, '1');
+    await AsyncStorage.setItem(ONBOARDED_KEY, '1');
     setStatus('signedOut');
   }, []);
 
   const login = useCallback(async (identifier: string, password: string) => {
-    const { token, user: u } = await authApi.login(identifier, password);
-    await persistSession(token, u);
+    const u = await authApi.login(identifier, password); // throws ApiError for the screen to display
+    setUser(u); setNotice(null); setStatus('signedIn');
   }, []);
 
   const register = useCallback(async (input: RegisterInput) => {
-    const { token, user: u } = await authApi.register(input);
-    await persistSession(token, u);
+    const u = await authApi.register(input);
+    setUser(u); setNotice(null); setJustRegistered(true); setStatus('signedIn');
   }, []);
 
   const logout = useCallback(async () => {
-    await AsyncStorage.multiRemove([KEYS.token, KEYS.user]);
-    setUser(null);
-    setStatus('signedOut');
-  }, []);
+    await authApi.logout(); // revokes on the server (best effort) and clears the device
+    signOutLocally();
+  }, [signOutLocally]);
 
-  const updateAvatar = useCallback(async (uri: string) => {
-    setUser((u) => {
-      if (!u) return u;
-      const next = { ...u, avatar: uri };
-      AsyncStorage.setItem(KEYS.user, JSON.stringify(next));
-      return next;
-    });
-    // TODO: upload the image and PATCH /me
+  const logoutAll = useCallback(async () => {
+    await authApi.logoutAll();
+    signOutLocally();
+  }, [signOutLocally]);
+
+  const refreshUser = useCallback(async () => { setUser(await usersApi.getMe()); }, []);
+
+  const updateProfile = useCallback(async (patch: { name?: string; email?: string }) => {
+    setUser(await usersApi.updateMe(patch));
   }, []);
 
   const value = useMemo(
-    () => ({ status, user, signupIntent, setSignupIntent, completeOnboarding, login, register, logout, updateAvatar }),
-    [status, user, signupIntent, completeOnboarding, login, register, logout, updateAvatar],
+    () => ({ status, user, notice, clearNotice: () => setNotice(null), justRegistered, clearJustRegistered: () => setJustRegistered(false), completeOnboarding, login, register, logout, logoutAll, refreshUser, updateProfile }),
+    [status, user, notice, justRegistered, completeOnboarding, login, register, logout, logoutAll, refreshUser, updateProfile],
   );
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
