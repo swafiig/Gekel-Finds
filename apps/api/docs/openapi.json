@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "GEKEL Finds API",
+    "title": "Gekel Finds API",
     "version": "1.0.0"
     
   },

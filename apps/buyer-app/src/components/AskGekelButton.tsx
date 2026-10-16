@@ -20,7 +20,7 @@ const PROMPTS = [
   "Sofa covers, 20 pcs bulk…",
   "Original Samsung charger…",
 ];
-const COLORS = ["#FF6B52", "#F44236", "#C4291F"] as const;
+const COLORS = ["#FF6B52", "#FA3504", "#C4291F"] as const;
 
 /** The one Ask GEKEL button. `hero` is the big living card, `compact` is the pill used in rows. */
 export default function AskGekelButton({
@@ -87,7 +87,7 @@ export default function AskGekelButton({
         accessibilityLabel="Ask GEKEL"
         style={[
           {
-            shadowColor: "#F44236",
+            shadowColor: "#FA3504",
             shadowOpacity: 0.35,
             shadowRadius: 16,
             shadowOffset: { width: 0, height: 8 },
@@ -148,7 +148,7 @@ export default function AskGekelButton({
               ]}
             />
             <View className="h-14 w-14 items-center justify-center rounded-full bg-white">
-              <Ionicons name="sparkles" size={26} color="#F44236" />
+              <Ionicons name="sparkles" size={26} color="#FA3504" />
             </View>
           </View>
           <View className="ml-4 flex-1">

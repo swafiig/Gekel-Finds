@@ -58,7 +58,7 @@ export default function EditProfileScreen() {
         hint={user?.email ? (user.emailVerified ? 'Verified' : 'Not verified yet') : 'Add an email for receipts and recovery'} returnKeyType="done" onSubmitEditing={save} />
 
       <View className="mb-6 flex-row items-center rounded-2xl border border-line bg-cream px-4 py-3.5">
-        <Ionicons name="call-outline" size={20} color="#A8A29E" />
+        <Ionicons name="call-outline" size={20} color={ic.faint} />
         <View className="ml-3 flex-1"><Text className="text-xs text-ink-mute">Phone number</Text><Text className="text-base font-semibold text-ink">{user?.phone}</Text></View>
         {user?.phoneVerified ? (
           <View className="flex-row items-center"><Ionicons name="checkmark-circle" size={16} color="#15803D" /><Text className="ml-1 text-xs font-bold text-success">Verified</Text></View>

@@ -83,7 +83,7 @@ export default function Button({
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color={solid ? "#fff" : "#F44236"} />
+        <ActivityIndicator color={solid ? "#fff" : "#FA3504"} />
       ) : (
         <View className="flex-row items-center">
           {icon && !after && (

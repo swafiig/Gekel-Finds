@@ -47,7 +47,7 @@ export default function ChamaCreateScreen() {
 
       <Text className="mb-2 mt-5 text-sm font-medium text-ink dark:text-sink">How many pieces are you taking?</Text>
       <View className="mb-6 h-14 flex-row items-center rounded-2xl border border-line dark:border-surface-line bg-white dark:bg-surface px-4">
-        <Ionicons name="cube-outline" size={18} color="#A8A29E" />
+        <Ionicons name="cube-outline" size={18} color={ic.faint} />
         <TextInput value={myQty} onChangeText={setMyQty} keyboardType="number-pad" className="ml-3 flex-1 text-base text-ink dark:text-sink" />
       </View>
 

@@ -69,7 +69,7 @@ export default function SupplierProfileScreen() {
               </Pressable>
               <View className="mt-4 flex-row items-center">
                 <View className="h-20 w-20 items-center justify-center rounded-3xl bg-white">
-                  <Ionicons name="storefront" size={36} color="#F44236" />
+                  <Ionicons name="storefront" size={36} color="#FA3504" />
                 </View>
                 <View className="ml-4 flex-1">
                   <View className="flex-row items-center">
@@ -153,7 +153,7 @@ export default function SupplierProfileScreen() {
           <View className="rounded-2xl border border-line dark:border-surface-line bg-white dark:bg-surface p-4">
             <View className="flex-row items-start">
               <View className="h-10 w-10 items-center justify-center rounded-full bg-brand-50">
-                <Ionicons name="location" size={20} color="#F44236" />
+                <Ionicons name="location" size={20} color="#FA3504" />
               </View>
               <View className="ml-3 flex-1">
                 <Text className="text-base font-bold text-ink">

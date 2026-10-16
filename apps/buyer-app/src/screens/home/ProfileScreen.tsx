@@ -33,9 +33,9 @@ export default function ProfileScreen() {
       <View className="mx-5 mt-8 overflow-hidden rounded-2xl border border-line">
         {ROWS.map((r, i) => (
           <Pressable key={r.label} className={`h-14 flex-row items-center px-4 active:bg-cream ${i > 0 ? 'border-t border-line' : ''}`}>
-            <Ionicons name={r.icon} size={20} color="#57534E" />
+            <Ionicons name={r.icon} size={20} color={ic.muted} />
             <Text className="ml-3 flex-1 text-base text-ink">{r.label}</Text>
-            <Ionicons name="chevron-forward" size={18} color="#A8A29E" />
+            <Ionicons name="chevron-forward" size={18} color={ic.faint} />
           </Pressable>
         ))}
       </View>

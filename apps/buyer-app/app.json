@@ -1,23 +1,24 @@
 {
   "expo": {
-    "name": "GEKEL Finds",
+    "name": "Gekel Finds",
     "slug": "buyer-app",
     "scheme": "gekelfinds",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gekelfinds.buyer"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#F44236",
+        "backgroundColor": "#FA3504",
         "foregroundImage": "./assets/logo.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.gekelfinds.buyer"
+      "package": "com.gekelfinds.buyer",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/logo.png"

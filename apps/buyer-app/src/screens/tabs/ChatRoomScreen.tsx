@@ -130,7 +130,7 @@ function PayCard({
   return (
     <View className="mb-3 w-[90%] self-start overflow-hidden rounded-2xl border border-brand-200 bg-white">
       <View className="flex-row items-center bg-brand-50 px-4 py-2">
-        <Ionicons name="cash" size={16} color="#F44236" />
+        <Ionicons name="cash" size={16} color="#FA3504" />
         <Text className="ml-2 flex-1 text-xs font-bold tracking-widest text-brand-700">
           PAY {formatKsh(m.amount ?? 0)}
         </Text>
@@ -172,7 +172,7 @@ function PayCard({
                 <View
                   className={`mt-3 h-12 flex-row items-center rounded-2xl border bg-white px-3 ${err ? "border-danger" : "border-line"}`}
                 >
-                  <Ionicons name="call-outline" size={18} color="#A8A29E" />
+                  <Ionicons name="call-outline" size={18} color={ic.faint} />
                   <TextInput
                     value={phone}
                     onChangeText={(t) => {
@@ -181,7 +181,7 @@ function PayCard({
                     }}
                     keyboardType="phone-pad"
                     placeholder="0712 345 678"
-                    placeholderTextColor="#A8A29E"
+                    placeholderTextcolor={ic.faint}
                     className="ml-2 flex-1 text-base text-ink"
                     editable={!sent}
                   />
@@ -366,7 +366,7 @@ export default function ChatRoomScreen() {
           accessibilityLabel="Go back"
           className="mr-2 h-10 w-10 items-center justify-center rounded-full bg-cream"
         >
-          <Ionicons name="arrow-back" size={20} color="#1C1917" />
+          <Ionicons name="arrow-back" size={20} color={ic.primary} />
         </Pressable>
         <Pressable
           disabled={!chat.supplierId}
@@ -396,7 +396,7 @@ export default function ChatRoomScreen() {
           accessibilityLabel="Call"
           className="h-10 w-10 items-center justify-center rounded-full bg-brand-50"
         >
-          <Ionicons name="call" size={18} color="#F44236" />
+          <Ionicons name="call" size={18} color="#FA3504" />
         </Pressable>
       </View>
 
@@ -463,14 +463,14 @@ export default function ChatRoomScreen() {
             accessibilityLabel="Send a photo"
             className="mr-2 h-12 w-12 items-center justify-center rounded-full border border-line bg-white"
           >
-            <Ionicons name="camera-outline" size={22} color="#57534E" />
+            <Ionicons name="camera-outline" size={22} color={ic.muted} />
           </Pressable>
           <View className="mr-2 h-12 flex-1 justify-center rounded-full border border-line bg-white px-4">
             <TextInput
               value={text}
               onChangeText={setText}
               placeholder="Message"
-              placeholderTextColor="#A8A29E"
+              placeholderTextcolor={ic.faint}
               className="text-base text-ink"
               returnKeyType="send"
               onSubmitEditing={() => send()}
@@ -514,7 +514,7 @@ export default function ChatRoomScreen() {
                 value={proofText}
                 onChangeText={setProofText}
                 placeholder="SJK2L9M4PQ Confirmed. Ksh1,200.00 paid to…"
-                placeholderTextColor="#A8A29E"
+                placeholderTextcolor={ic.faint}
                 className="text-base text-ink"
                 style={{ minHeight: 76, textAlignVertical: "top" }}
               />
@@ -541,7 +541,7 @@ export default function ChatRoomScreen() {
                 }}
                 className="mt-3 h-12 flex-row items-center justify-center rounded-2xl border border-dashed border-brand-400 bg-brand-50"
               >
-                <Ionicons name="image-outline" size={18} color="#F44236" />
+                <Ionicons name="image-outline" size={18} color="#FA3504" />
                 <Text className="ml-2 text-sm font-semibold text-brand-600">
                   Attach a screenshot
                 </Text>

@@ -16,14 +16,25 @@ module.exports = {
           700: "#B82419",
         },
         cream: "#F9F7F3",
-        ink: { DEFAULT: "#1C1917", soft: "#57534E", mute: "#A8A29E" },
-        line: "#E7E2DA",
+        ink: {
+          DEFAULT: "#0A0A0A",
+          soft: "#4A4A4A",
+          mute: "#9A9A9A",
+        },
+        line: "#E5E5E5",
         success: "#15803D",
         danger: "#DC2626",
-        surface: { DEFAULT: "#1C1714", soft: "#262019", line: "#3A322B" },
-        sink: { DEFAULT: "#F2EDE6", soft: "#C7BDB2", mute: "#8A8077" },
+        surface: {
+          DEFAULT: "#0A0A0A",
+          soft: "#151515",
+          line: "#262626",
+        },
+        sink: {
+          DEFAULT: "#F5F5F5",
+          soft: "#B0B0B0",
+          mute: "#6E6E6E",
+        },
 
-        // Pre-blended overlays — replace slash-opacity syntax with these
         "white-5": "rgba(255,255,255,0.05)",
         "white-10": "rgba(255,255,255,0.10)",
         "white-15": "rgba(255,255,255,0.15)",

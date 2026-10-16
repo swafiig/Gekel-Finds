@@ -75,7 +75,7 @@ function PhotoTile({
           </Text>
         </View>
         <View className="mt-2 flex-row items-center">
-          <Ionicons name="camera" size={12} color="#57534E" />
+          <Ionicons name="camera" size={12} color={ic.muted} />
           <Text className="ml-1.5 text-xs font-semibold text-ink-soft">
             Rider photo · {PHOTO_LABEL.receipt}
           </Text>
@@ -219,11 +219,11 @@ export default function OrderDetailScreen() {
           onPress={() => nav.navigate("Bundle", { id: order.bundleId! })}
           className="mt-3 flex-row items-center rounded-2xl bg-brand-50 p-3.5"
         >
-          <Ionicons name="git-merge" size={18} color="#F44236" />
+          <Ionicons name="git-merge" size={18} color="#FA3504" />
           <Text className="ml-2 flex-1 text-sm font-semibold text-ink">
             Part of a combined order from {order.stops} shops
           </Text>
-          <Ionicons name="chevron-forward" size={16} color="#F44236" />
+          <Ionicons name="chevron-forward" size={16} color="#FA3504" />
         </Pressable>
       )}
 
@@ -255,7 +255,7 @@ export default function OrderDetailScreen() {
         className="mt-3 flex-row items-center rounded-2xl border border-line bg-white p-3 active:bg-cream"
       >
         <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-50">
-          <Ionicons name="storefront" size={20} color="#F44236" />
+          <Ionicons name="storefront" size={20} color="#FA3504" />
         </View>
         <View className="ml-3 flex-1">
           <Text className="text-base font-bold text-ink">{supplier.name}</Text>
@@ -270,7 +270,7 @@ export default function OrderDetailScreen() {
           <Ionicons
             name="chatbubble-ellipses-outline"
             size={22}
-            color="#F44236"
+            color="#FA3504"
           />
         </Pressable>
       </Pressable>
@@ -343,13 +343,13 @@ export default function OrderDetailScreen() {
                   : "bicycle"
             }
             size={18}
-            color="#F44236"
+            color="#FA3504"
           />
           <Text className="ml-2 flex-1 text-sm font-bold text-ink">{how}</Text>
         </View>
         {order.dropship && (
           <View className="mt-3 flex-row items-center rounded-xl bg-brand-50 p-3">
-            <Ionicons name="people" size={18} color="#F44236" />
+            <Ionicons name="people" size={18} color="#FA3504" />
             <Text className="ml-2 flex-1 text-sm text-ink">
               Shipping to your customer{" "}
               <Text className="font-bold">{order.dropship.name}</Text> ·{" "}
@@ -361,7 +361,7 @@ export default function OrderDetailScreen() {
           <Ionicons
             name="location"
             size={18}
-            color="#F44236"
+            color="#FA3504"
             style={{ marginTop: 1 }}
           />
           <Text className="ml-2 flex-1 text-sm text-ink">{order.address}</Text>
@@ -382,7 +382,7 @@ export default function OrderDetailScreen() {
         )}
         {order.stage >= 3 && !courier && (
           <View className="mt-3 flex-row items-center">
-            <Ionicons name="bicycle" size={18} color="#F44236" />
+            <Ionicons name="bicycle" size={18} color="#FA3504" />
             <Text className="ml-2 flex-1 text-sm text-ink">
               {order.rider.name} · {order.rider.vehicle}
             </Text>
@@ -493,7 +493,7 @@ export default function OrderDetailScreen() {
         <View className="mb-5 rounded-2xl border border-line bg-white p-4">
           <View className="flex-row items-center">
             <View className="h-12 w-12 items-center justify-center rounded-full bg-brand-50">
-              <Ionicons name="bicycle" size={24} color="#F44236" />
+              <Ionicons name="bicycle" size={24} color="#FA3504" />
             </View>
             <View className="ml-3 flex-1">
               <Text className="text-base font-bold text-ink">
@@ -621,7 +621,7 @@ export default function OrderDetailScreen() {
               <Ionicons
                 name="return-up-back-outline"
                 size={16}
-                color="#57534E"
+                color={ic.muted}
               />
               <Text className="ml-2 text-sm font-bold text-ink-soft dark:text-sink-soft">
                 Not happy with this order? Request a return
@@ -674,7 +674,7 @@ function ReturnStatusCard({
   return (
     <View>
       <View className="flex-row items-center">
-        <Ionicons name="return-up-back" size={18} color="#F44236" />
+        <Ionicons name="return-up-back" size={18} color="#FA3504" />
         <Text className="ml-2 text-base font-bold text-ink dark:text-sink">
           Return request
         </Text>

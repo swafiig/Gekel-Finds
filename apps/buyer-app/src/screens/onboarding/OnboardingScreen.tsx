@@ -57,7 +57,7 @@ function FloatChip({
         <Ionicons
           name={icon}
           size={11}
-          color="#F44236"
+          color="#FA3504"
           style={{ marginRight: 4 }}
         />
       )}
@@ -164,7 +164,7 @@ function PageSeal() {
           ] as [Icon, string][]
         ).map(([i, l]) => (
           <View key={l} className="flex-row items-center">
-            <Ionicons name={i} size={18} color="#1C1917" />
+            <Ionicons name={i} size={18} color={ic.primary} />
             <Text className="ml-2 text-xs font-bold tracking-widest text-ink">
               {l}
             </Text>
@@ -185,7 +185,7 @@ function PageDeliver() {
         <DeliveryIllustration height={200} />
         <FloatChip
           label="NO MARKUP"
-          dot="#F44236"
+          dot="#FA3504"
           style={{ left: 12, top: 28 }}
         />
         <FloatChip
@@ -205,7 +205,7 @@ function PageDeliver() {
         <Ionicons
           name="phone-portrait"
           size={20}
-          color="#F44236"
+          color="#FA3504"
           style={{ marginTop: 2 }}
         />
         <Text className="ml-3 flex-1 text-sm leading-5 text-ink">
@@ -255,7 +255,7 @@ export default function OnboardingScreen() {
             onPress={() => go(index - 1)}
             accessibilityLabel="Previous step"
           >
-            <Ionicons name="arrow-back" size={22} color="#1C1917" />
+            <Ionicons name="arrow-back" size={22} color={ic.primary} />
           </Pressable>
         ) : (
           <Text className="text-sm font-semibold tracking-widest text-ink">
@@ -264,7 +264,7 @@ export default function OnboardingScreen() {
         )}
         {last && (
           <View className="flex-row items-center">
-            <Ionicons name="shield-checkmark" size={14} color="#1C1917" />
+            <Ionicons name="shield-checkmark" size={14} color={ic.primary} />
             <Text className="ml-1.5 text-sm font-semibold tracking-widest text-ink">
               STEP {TOTAL} OF {TOTAL}
             </Text>
@@ -324,7 +324,7 @@ export default function OnboardingScreen() {
                 }),
                 backgroundColor: scrollX.interpolate({
                   inputRange: range,
-                  outputRange: ["#D6D3D1", "#F44236", "#D6D3D1"],
+                  outputRange: ["#D6D3D1", "#FA3504", "#D6D3D1"],
                   extrapolate: "clamp",
                 }),
               }}
@@ -361,7 +361,7 @@ export default function OnboardingScreen() {
               <Ionicons
                 name="storefront-outline"
                 size={16}
-                color="#1C1917"
+                color={ic.primary}
                 style={{ marginRight: 6 }}
               />
             )}

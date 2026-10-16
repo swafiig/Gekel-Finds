@@ -37,14 +37,14 @@ export default function FindsScreen() {
       <View className="flex-row items-center justify-between px-5 pt-3">
         <Text className="text-[28px] font-extrabold text-ink dark:text-sink">{selecting ? `${picked.length} selected` : 'Search'}</Text>
         {selecting ? <Pressable hitSlop={8} onPress={() => setPicked([])}><Text className="text-base font-bold text-brand-600">Cancel</Text></Pressable> : (
-          <Pressable onPress={() => nav.navigate('Cart')} hitSlop={8} accessibilityLabel="Cart" className="h-10 w-10 items-center justify-center rounded-full border border-line dark:border-surface-line"><Ionicons name="cart-outline" size={20} color="#1C1917" />{cart.length > 0 && <View className="absolute -right-1 -top-1 h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-500 px-1"><Text className="text-[10px] font-bold text-white">{cart.length}</Text></View>}</Pressable>
+          <Pressable onPress={() => nav.navigate('Cart')} hitSlop={8} accessibilityLabel="Cart" className="h-10 w-10 items-center justify-center rounded-full border border-line dark:border-surface-line"><Ionicons name="cart-outline" size={20} color={ic.primary} />{cart.length > 0 && <View className="absolute -right-1 -top-1 h-4 min-w-[16px] items-center justify-center rounded-full bg-brand-500 px-1"><Text className="text-[10px] font-bold text-white">{cart.length}</Text></View>}</Pressable>
         )}
       </View>
       {!selecting && <Text className="px-5 pt-1 text-xs text-ink-mute dark:text-sink-mute">Tip: press and hold items to pick many and order in bulk.</Text>}
       <View className="mx-5 mt-3 h-12 flex-row items-center rounded-2xl bg-cream dark:bg-surface-soft px-4">
-        <Ionicons name="search" size={18} color="#A8A29E" />
-        <TextInput className="ml-3 flex-1 text-base text-ink dark:text-sink" placeholder="What are you looking for?" placeholderTextColor="#A8A29E" value={q} onChangeText={setQ} />
-        {q.length > 0 && <Pressable hitSlop={8} onPress={() => setQ('')}><Ionicons name="close-circle" size={18} color="#A8A29E" /></Pressable>}
+        <Ionicons name="search" size={18} color={ic.faint} />
+        <TextInput className="ml-3 flex-1 text-base text-ink dark:text-sink" placeholder="What are you looking for?" placeholderTextcolor={ic.faint} value={q} onChangeText={setQ} />
+        {q.length > 0 && <Pressable hitSlop={8} onPress={() => setQ('')}><Ionicons name="close-circle" size={18} color={ic.faint} /></Pressable>}
       </View>
       <View className="my-3 max-h-12">
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>

@@ -28,7 +28,7 @@ export default function PaymentsScreen() {
           <View className="mb-3 flex-row items-center rounded-2xl border border-line bg-white p-4">
             <View className="h-10 w-10 items-center justify-center rounded-full bg-green-50"><Ionicons name="phone-portrait" size={19} color="#15803D" /></View>
             <View className="ml-3 flex-1"><Text className="text-base font-bold text-ink">{item.number}</Text>{item.isDefault ? <Text className="text-xs font-semibold text-brand-600">Default</Text> : <Pressable hitSlop={8} onPress={() => setDefaultPay(item.id)}><Text className="text-xs font-semibold text-ink-soft">Set as default</Text></Pressable>}</View>
-            <Pressable hitSlop={10} onPress={() => Alert.alert('Remove number?', item.number, [{ text: 'Cancel', style: 'cancel' }, { text: 'Remove', style: 'destructive', onPress: () => removePayNumber(item.id) }])}><Ionicons name="trash-outline" size={20} color="#A8A29E" /></Pressable>
+            <Pressable hitSlop={10} onPress={() => Alert.alert('Remove number?', item.number, [{ text: 'Cancel', style: 'cancel' }, { text: 'Remove', style: 'destructive', onPress: () => removePayNumber(item.id) }])}><Ionicons name="trash-outline" size={20} color={ic.faint} /></Pressable>
           </View>
         )}
         ListFooterComponent={

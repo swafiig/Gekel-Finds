@@ -103,9 +103,9 @@ export default function OrdersScreen() {
                     {formatKsh(item.price + item.deliveryFee + item.serviceFee)}
                   </Text>
                   {item.delivery.method === "courier" ? (
-                    <Ionicons name="cube-outline" size={16} color="#A8A29E" />
+                    <Ionicons name="cube-outline" size={16} color={ic.faint} />
                   ) : item.delivery.speed === "express" ? (
-                    <Ionicons name="flash" size={16} color="#F44236" />
+                    <Ionicons name="flash" size={16} color="#FA3504" />
                   ) : null}
                 </View>
               </View>

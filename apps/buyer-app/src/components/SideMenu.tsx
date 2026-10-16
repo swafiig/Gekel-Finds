@@ -190,7 +190,7 @@ export default function SideMenu() {
                 <Switch
                   value={resellerMode}
                   onValueChange={setResellerMode}
-                  trackColor={{ true: "#F44236", false: "#E7E2DA" }}
+                  trackColor={{ true: "#FA3504", false: "#E7E2DA" }}
                   thumbColor="#fff"
                 />
               </View>
@@ -208,7 +208,7 @@ export default function SideMenu() {
               <View className="mt-2 flex-row items-center">
                 <Logo size={26} />
                 <Text className="ml-2 text-xs text-ink-mute dark:text-sink-mute">
-                  GEKEL Finds · v{APP_VERSION} ({BUILD_NUMBER})
+                  Gekel Finds · v{APP_VERSION} ({BUILD_NUMBER})
                 </Text>
               </View>
             </View>

@@ -69,16 +69,16 @@ export default function ChamaDetailScreen() {
           ) : (
             <Pressable onPress={() => setChamaPayer(id, m.id)} className={`rounded-full px-3 py-1.5 ${chama.payerMemberId === m.id ? 'bg-brand-500' : 'bg-cream dark:bg-surface-soft'}`}><Text className={`text-xs font-bold ${chama.payerMemberId === m.id ? 'text-white' : 'text-ink-soft dark:text-sink-soft'}`}>{chama.payerMemberId === m.id ? 'Will pay' : 'Make payer'}</Text></Pressable>
           )}
-          <Pressable hitSlop={8} onPress={() => removeChamaMember(id, m.id)} className="ml-2"><Ionicons name="close-circle" size={18} color="#A8A29E" /></Pressable>
+          <Pressable hitSlop={8} onPress={() => removeChamaMember(id, m.id)} className="ml-2"><Ionicons name="close-circle" size={18} color={ic.faint} /></Pressable>
         </View>
       ))}
 
       <View className="mt-3 rounded-2xl border border-dashed border-brand-300 bg-brand-50 p-4">
         <Text className="mb-2 text-sm font-bold text-ink">Add a member</Text>
         {error && <Text className="mb-2 text-xs text-danger">{error}</Text>}
-        <View className="mb-2 h-12 flex-row items-center rounded-xl bg-white px-3"><Ionicons name="person-outline" size={16} color="#A8A29E" /><TextInput value={name} onChangeText={setName} placeholder="Name" placeholderTextColor="#A8A29E" className="ml-2 flex-1 text-sm text-ink" /></View>
-        <View className="mb-2 h-12 flex-row items-center rounded-xl bg-white px-3"><Ionicons name="call-outline" size={16} color="#A8A29E" /><TextInput value={phone} onChangeText={setPhone} placeholder="Phone — paste from Contacts" placeholderTextColor="#A8A29E" keyboardType="phone-pad" className="ml-2 flex-1 text-sm text-ink" /></View>
-        <View className="mb-3 h-12 flex-row items-center rounded-xl bg-white px-3"><Ionicons name="cube-outline" size={16} color="#A8A29E" /><TextInput value={qty} onChangeText={setQty} placeholder="How many pieces" placeholderTextColor="#A8A29E" keyboardType="number-pad" className="ml-2 flex-1 text-sm text-ink" /></View>
+        <View className="mb-2 h-12 flex-row items-center rounded-xl bg-white px-3"><Ionicons name="person-outline" size={16} color={ic.faint} /><TextInput value={name} onChangeText={setName} placeholder="Name" placeholderTextcolor={ic.faint} className="ml-2 flex-1 text-sm text-ink" /></View>
+        <View className="mb-2 h-12 flex-row items-center rounded-xl bg-white px-3"><Ionicons name="call-outline" size={16} color={ic.faint} /><TextInput value={phone} onChangeText={setPhone} placeholder="Phone — paste from Contacts" placeholderTextcolor={ic.faint} keyboardType="phone-pad" className="ml-2 flex-1 text-sm text-ink" /></View>
+        <View className="mb-3 h-12 flex-row items-center rounded-xl bg-white px-3"><Ionicons name="cube-outline" size={16} color={ic.faint} /><TextInput value={qty} onChangeText={setQty} placeholder="How many pieces" placeholderTextcolor={ic.faint} keyboardType="number-pad" className="ml-2 flex-1 text-sm text-ink" /></View>
         <View className="flex-row gap-3">
           <Button title="Add" className="h-11 flex-1" onPress={add} />
           <Button title="Share invite" icon="share-social-outline" variant="outline" className="h-11 flex-1" onPress={invite} />
