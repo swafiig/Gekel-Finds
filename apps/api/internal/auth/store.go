@@ -16,11 +16,10 @@ import (
 
 type Store struct{ DB *pgxpool.Pool }
 
-const userCols = `id, full_name, email, phone, role, is_active, phone_verified_at, email_verified_at, created_at, last_login_at`
-
+const userCols = `id, full_name, email, phone, role, is_active, phone_verified_at, email_verified_at, created_at, last_login_at, COALESCE(expo_push_token, '')`
 func scanUser(row pgx.Row, extra ...any) (User, error) {
 	var u User
-	dest := append([]any{&u.ID, &u.FullName, &u.Email, &u.Phone, &u.Role, &u.IsActive, &u.PhoneVerifiedAt, &u.EmailVerifiedAt, &u.CreatedAt, &u.LastLoginAt}, extra...)
+	dest := append([]any{&u.ID, &u.FullName, &u.Email, &u.Phone, &u.Role, &u.IsActive, &u.PhoneVerifiedAt, &u.EmailVerifiedAt, &u.CreatedAt, &u.LastLoginAt, &u.ExpoPushToken}, extra...)
 	err := row.Scan(dest...)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return User{}, ErrNotFound
@@ -344,5 +343,10 @@ func (s Store) Audit(ctx context.Context, e AuditEvent) error {
 	}
 	_, err := s.DB.Exec(ctx, `INSERT INTO auth_audit_logs (user_id,event_type,success,ip_address,user_agent,metadata) VALUES ($1,$2,$3,$4::inet,$5,$6)`,
 		uid, e.Type, e.Success, ipArg(e.Meta.IP), e.Meta.UserAgent, data)
+	return err
+}
+
+func (s Store) UpdatePushToken(ctx context.Context, userID, token string) error {
+	_, err := s.DB.Exec(ctx, `UPDATE users SET expo_push_token = $1 WHERE id = $2`, token, userID)
 	return err
 }

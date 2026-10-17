@@ -1,4 +1,3 @@
-// Package server wires handlers, middleware and rate limits into one http.Handler.
 package server
 
 import (
@@ -16,6 +15,7 @@ import (
 	"github.com/geofreysakayo/gekel-finds-auth/internal/catalog"
 	"github.com/geofreysakayo/gekel-finds-auth/internal/config"
 	"github.com/geofreysakayo/gekel-finds-auth/internal/httpx"
+	"github.com/geofreysakayo/gekel-finds-auth/internal/notifications"
 	"github.com/geofreysakayo/gekel-finds-auth/internal/users"
 )
 
@@ -74,6 +74,7 @@ func Router(d Deps) http.Handler {
 	mux.HandleFunc("GET /api/v1/categories", catalog.Handler{}.List)
 
 	/* signed-in endpoints */
+	u := d.Users
 	mux.Handle("GET /api/v1/auth/me", protect(a.Me))
 	mux.Handle("POST /api/v1/auth/logout", protect(a.Logout))
 	mux.Handle("POST /api/v1/auth/logout-all", protect(a.LogoutAll, rl("logout_all", 10, time.Hour)))
@@ -82,9 +83,33 @@ func Router(d Deps) http.Handler {
 	mux.Handle("POST /api/v1/auth/phone/verify", protect(a.VerifyPhone, rl("pv_verify", 40, 15*time.Minute)))
 	mux.Handle("GET /api/v1/auth/sessions", protect(a.Sessions))
 	mux.Handle("DELETE /api/v1/auth/sessions/{id}", protect(a.RevokeSession))
+	mux.Handle("POST /api/v1/users/push-token", protect(u.UpdatePushToken))
+		/* DEV ONLY: Trigger a test notification */
+	mux.Handle("POST /api/v1/users/test-notification", protect(func(w http.ResponseWriter, r *http.Request) {
+		claims, _ := auth.ClaimsFrom(r.Context())
+		
+		// Fetch the user to get their push token (now includes ExpoPushToken via userCols)
+		user, err := d.Users.Auth.Svc.Store.UserByID(r.Context(), claims.UserID)
+		if err != nil {
+			httpx.Error(w, r, http.StatusInternalServerError, "db_error", "Could not fetch user", nil)
+			return
+		}
+
+		// Send the notification
+		notifications.Send(
+			user.ExpoPushToken,
+			"GEKEL Test 🚀",
+			"This is a test notification from the backend.",
+			map[string]string{"type": "test"},
+			d.Log,
+		)
+
+		httpx.JSON(w, http.StatusOK, map[string]string{"status": "sent"})
+	}))
+	
 
 	/* users */
-	u := d.Users
+
 	staff := auth.RequireRoles(auth.RoleStaff, auth.RoleAdmin, auth.RoleSuperAdmin)
 	admin := auth.RequireRoles(auth.RoleAdmin, auth.RoleSuperAdmin)
 	super := auth.RequireRoles(auth.RoleSuperAdmin)

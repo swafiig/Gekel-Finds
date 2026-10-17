@@ -201,3 +201,36 @@ func (h Handler) SetRole(w http.ResponseWriter, r *http.Request) {
 	h.svc().AuditAdmin(r.Context(), actor.UserID, "admin_set_role", h.Auth.Meta(r), map[string]any{"target": t.ID, "from": t.Role, "to": in.Role})
 	httpx.JSON(w, http.StatusOK, u)
 }
+type pushTokenReq struct {
+	Token string `json:"token"`
+}
+
+
+func (h Handler) UpdatePushToken(w http.ResponseWriter, r *http.Request) {
+	// 1. Get the user ID from the auth context
+	claims, ok := auth.ClaimsFrom(r.Context())
+	if !ok {
+		httpx.Error(w, r, http.StatusUnauthorized, "unauthenticated", "Sign in to continue", nil)
+		return
+	}
+
+	// 2. Decode the JSON body
+	var in pushTokenReq
+	if !httpx.DecodeJSON(w, r, &in) {
+		return
+	}
+
+	if in.Token == "" {
+		httpx.Error(w, r, http.StatusUnprocessableEntity, "validation_failed", "Token is required", nil)
+		return
+	}
+
+	// 3. Save to database (using the Auth handler's Store)
+	if err := h.st().UpdatePushToken(r.Context(), claims.UserID, in.Token); err != nil {
+		h.Auth.WriteError(w, r, err)
+		return
+	}
+
+	// 4. Return 204 No Content
+	httpx.NoContent(w)
+}

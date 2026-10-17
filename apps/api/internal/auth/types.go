@@ -40,6 +40,7 @@ type User struct {
 	EmailVerifiedAt *time.Time `json:"email_verified_at"`
 	CreatedAt       time.Time  `json:"created_at"`
 	LastLoginAt     *time.Time `json:"last_login_at"`
+	ExpoPushToken   string     `json:"expo_push_token,omitempty"`
 }
 
 type userRecord struct {

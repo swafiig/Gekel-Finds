@@ -124,4 +124,5 @@ type User struct {
 	IsActive     bool
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
+	ExpoPushToken pgtype.Text
 }
