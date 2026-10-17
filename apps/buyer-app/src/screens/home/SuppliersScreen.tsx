@@ -27,6 +27,7 @@ import {
 import { formatKm, haversineKm } from "../../utils/geo";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 /** Every seller on GEKEL does wholesale, so there is no "retailers" tab — just an optional filter for who also sells single pieces. */
 export default function SuppliersScreen() {
@@ -37,6 +38,7 @@ export default function SuppliersScreen() {
   const [q, setQ] = useState("");
   const [market, setMarket] = useState<string | undefined>(params?.market);
   const [retailOnly, setRetailOnly] = useState(params?.retailOnly ?? false);
+  const ic = useIconColor();
 
   const data = useMemo(
     () =>
@@ -75,7 +77,7 @@ export default function SuppliersScreen() {
         <TextInput
           className="ml-3 flex-1 text-base text-ink dark:text-sink"
           placeholder="Search suppliers or categories"
-          placeholderTextcolor={ic.faint}
+          placeholderTextColor={ic.faint}
           value={q}
           onChangeText={setQ}
         />

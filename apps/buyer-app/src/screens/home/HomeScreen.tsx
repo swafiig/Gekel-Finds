@@ -138,10 +138,16 @@ export default function HomeScreen() {
             <Avatar uri={avatarUri} name={user?.name} size={40} />
           </Pressable>
           <View className="ml-3 flex-1">
-            <Text numberOfLines={1} className="text-lg font-extrabold text-ink">
+            <Text
+              numberOfLines={1}
+              className="text-lg font-extrabold text-ink dark:text-sink"
+            >
               {greet}, {user?.name?.split(" ")[0] ?? "rafiki"} 👋
             </Text>
-            <Text numberOfLines={1} className="text-xs text-ink-soft">
+            <Text
+              numberOfLines={1}
+              className="text-xs text-ink-soft dark:text-sink-soft"
+            >
               {greetSub}
             </Text>
             <Pressable

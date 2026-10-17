@@ -18,6 +18,7 @@ import Chip from "../../components/Chip";
 import { useAppData } from "../../context/AppDataContext";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 const REASONS = [
   "Wrong item",
@@ -37,6 +38,7 @@ export default function ReturnRequestScreen() {
   const [details, setDetails] = useState("");
   const [photo, setPhoto] = useState<string>();
   const [error, setError] = useState<string>();
+  const ic = useIconColor();
 
   const addPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -105,7 +107,7 @@ export default function ReturnRequestScreen() {
           value={details}
           onChangeText={setDetails}
           placeholder="What's wrong, exactly?"
-          placeholderTextcolor={ic.faint}
+          placeholderTextColor={ic.faint}
           className="text-base text-ink dark:text-sink"
           style={{ minHeight: 64, textAlignVertical: "top" }}
         />

@@ -10,6 +10,7 @@ import { useAppData } from "../../context/AppDataContext";
 import { MARKETS } from "../../data/mock";
 import { isKenyanPhone } from "../../utils/validation";
 import { useNav } from "../../hooks/useNav";
+import { useIconColor } from "../../hooks/useIconColor";
 
 type Errors = Partial<Record<"name" | "phone" | "location" | "items", string>>;
 
@@ -26,6 +27,7 @@ export default function OwnSupplierScreen() {
     setF((p) => ({ ...p, [k]: v }));
     setErrors((p) => ({ ...p, [k]: undefined }));
   };
+  const ic = useIconColor();
 
   const submit = () => {
     const e: Errors = {};
@@ -127,7 +129,7 @@ export default function OwnSupplierScreen() {
           value={f.items}
           onChangeText={set("items")}
           placeholder="2 pairs of size 42 black sneakers"
-          placeholderTextcolor={ic.faint}
+          placeholderTextColor={ic.faint}
           className="text-base text-ink"
           style={{ minHeight: 70, textAlignVertical: "top" }}
         />

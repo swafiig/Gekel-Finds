@@ -21,6 +21,7 @@ import { COUNTIES } from "../../data/mock";
 import { isKenyanPhone } from "../../utils/validation";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 type Errors = Partial<Record<"area" | "unit" | "phone", string>>;
 const mapCounty = (r?: string | null) =>
@@ -61,6 +62,7 @@ export default function AddressFormScreen() {
   const [errors, setErrors] = useState<Errors>({});
   const [locating, setLocating] = useState(false);
   const [note, setNote] = useState<string>();
+  const ic = useIconColor();
 
   /** Fill empty fields from a GPS fix or a map pin. */
   const fillFrom = async (lat: number, lng: number) => {

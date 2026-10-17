@@ -21,6 +21,7 @@ import {
 } from "../../data/mock";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 export default function ProductDetailScreen() {
   const nav = useNav();
@@ -45,6 +46,7 @@ export default function ProductDetailScreen() {
   const unit = unitPriceFor(id, qty);
   const items = unit * qty;
   const isWholesale = modeFor(id, qty) === "wholesale";
+  const ic = useIconColor();
   const chamaNeed = w?.minQty ?? 0;
 
   const inviteFriends = () =>
