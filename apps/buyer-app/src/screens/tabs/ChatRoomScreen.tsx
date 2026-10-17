@@ -24,6 +24,7 @@ import { formatKsh } from "../../data/mock";
 import { isKenyanPhone } from "../../utils/validation";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 const QUICK = [
   "Is it available?",
@@ -118,6 +119,7 @@ function PayCard({
   const [err, setErr] = useState<string>();
   const [sent, setSent] = useState(false);
   const paid = !!order && order.stage >= 1;
+  const ic = useIconColor();
 
   const send = () => {
     if (!order) return;
@@ -181,7 +183,7 @@ function PayCard({
                     }}
                     keyboardType="phone-pad"
                     placeholder="0712 345 678"
-                    placeholderTextcolor={ic.faint}
+                    placeholderTextColor={ic.faint}
                     className="ml-2 flex-1 text-base text-ink"
                     editable={!sent}
                   />
@@ -248,6 +250,7 @@ export default function ChatRoomScreen() {
   const [sheet, setSheet] = useState(false);
   const [proofText, setProofText] = useState("");
   const [proofImg, setProofImg] = useState<string>();
+  const ic = useIconColor();
 
   useEffect(() => {
     markChatRead(id);
@@ -470,7 +473,7 @@ export default function ChatRoomScreen() {
               value={text}
               onChangeText={setText}
               placeholder="Message"
-              placeholderTextcolor={ic.faint}
+              placeholderTextColor={ic.faint}
               className="text-base text-ink"
               returnKeyType="send"
               onSubmitEditing={() => send()}
@@ -514,7 +517,7 @@ export default function ChatRoomScreen() {
                 value={proofText}
                 onChangeText={setProofText}
                 placeholder="SJK2L9M4PQ Confirmed. Ksh1,200.00 paid to…"
-                placeholderTextcolor={ic.faint}
+                placeholderTextColor={ic.faint}
                 className="text-base text-ink"
                 style={{ minHeight: 76, textAlignVertical: "top" }}
               />

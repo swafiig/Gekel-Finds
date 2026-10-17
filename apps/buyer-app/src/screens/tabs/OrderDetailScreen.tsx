@@ -26,6 +26,7 @@ import {
 } from "../../data/mock";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 const PHOTO_LABEL = {
   sealed: "Sealed at the stall",
@@ -49,6 +50,7 @@ function PhotoTile({
   product: Product;
   order: Order;
 }) {
+  const ic = useIconColor();
   if (event.imageUri)
     return (
       <Image
@@ -157,7 +159,7 @@ export default function OrderDetailScreen() {
   const how = courier
     ? `${order.delivery.courier} · ${order.delivery.dest === "door" ? "to your door" : "collect at office"}`
     : `${order.delivery.speed === "express" ? "Express · shop straight to you" : "Standard"} · ${order.delivery.dest === "pickup" ? `pickup at ${order.delivery.pickupPoint}` : "to your door"}`;
-
+  const ic = useIconColor();
   return (
     <Screen scroll>
       <BackHeader title="Order" />

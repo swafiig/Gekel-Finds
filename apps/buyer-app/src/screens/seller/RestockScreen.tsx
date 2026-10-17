@@ -8,10 +8,12 @@ import ProductImage from "../../components/ProductImage";
 import { useAppData } from "../../context/AppDataContext";
 import { PRODUCTS, formatKsh } from "../../data/mock";
 import { useNav } from "../../hooks/useNav";
+import { useIconColor } from "../../hooks/useIconColor";
 
 /** Order from a wholesaler; our rider collects and shelves it for you — no trip to the market needed. */
 export default function RestockScreen() {
   const nav = useNav();
+  const ic = useIconColor();
   const { requestRestock } = useAppData();
   const wholesaleItems = PRODUCTS.filter((p) => p.wholesale);
   const [productId, setProductId] = useState(wholesaleItems[0]?.id);

@@ -1,6 +1,7 @@
 import React, { forwardRef, useState } from "react";
 import { Pressable, Text, TextInput, TextInputProps, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useIconColor } from "../hooks/useIconColor";
 
 interface Props extends TextInputProps {
   label: string;
@@ -16,6 +17,7 @@ const Input = forwardRef<TextInput, Props>(function Input(
 ) {
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
+  const ic = useIconColor();
 
   const border = error
     ? "border-danger"
@@ -42,7 +44,7 @@ const Input = forwardRef<TextInput, Props>(function Input(
         <TextInput
           ref={ref}
           className="flex-1 text-base text-ink dark:text-sink"
-          placeholderTextcolor={ic.faint}
+          placeholderTextColor={ic.faint}
           secureTextEntry={secure && hidden}
           autoCapitalize="none"
           autoCorrect={false}

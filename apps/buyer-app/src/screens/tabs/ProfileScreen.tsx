@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useAppData } from "../../context/AppDataContext";
 import { useTheme, ThemePref } from "../../context/ThemeContext";
 import { useNav } from "../../hooks/useNav";
+import { useIconColor } from "../../hooks/useIconColor";
 
 const THEME_OPTIONS: {
   key: ThemePref;
@@ -21,6 +22,7 @@ const THEME_OPTIONS: {
 
 export default function ProfileScreen() {
   const nav = useNav();
+  const ic = useIconColor();
   const { scheme } = useTheme();
   const iconC = scheme === "dark" ? "#C7BDB2" : "#57534E";
   const { user, logout } = useAuth();

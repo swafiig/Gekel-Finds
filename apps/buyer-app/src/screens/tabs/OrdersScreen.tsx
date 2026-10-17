@@ -17,9 +17,11 @@ import {
   timeAgo,
 } from "../../data/mock";
 import { useNav } from "../../hooks/useNav";
+import { useIconColor } from "../../hooks/useIconColor";
 
 export default function OrdersScreen() {
   const nav = useNav();
+  const ic = useIconColor();
   const { orders } = useAppData();
   const [tab, setTab] = useState<"active" | "past">("active");
   const data = orders.filter((o) =>

@@ -1,4 +1,4 @@
-// Command server runs the GEKEL Finds API.
+// Command server runs the Gekel Finds API.
 package main
 
 import (

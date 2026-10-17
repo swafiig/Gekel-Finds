@@ -3,6 +3,7 @@ import { Modal, Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppData, formatAddress } from "../context/AppDataContext";
 import { useNav } from "../hooks/useNav";
+import { useIconColor } from "../hooks/useIconColor";
 
 /** Bottom sheet to pick where GEKEL delivers. Selecting an address makes it the default. */
 export default function AddressSheet({
@@ -14,6 +15,7 @@ export default function AddressSheet({
 }) {
   const nav = useNav();
   const { addresses, setDefaultAddress } = useAppData();
+  const ic = useIconColor();
 
   const useHere = () => {
     onClose();

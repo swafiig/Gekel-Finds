@@ -19,6 +19,7 @@ import {
   DeliveryIllustration,
 } from "../../components/Illustrations";
 import { useAuth } from "../../context/AuthContext";
+import { useIconColor } from "../../hooks/useIconColor";
 
 type Icon = keyof typeof Ionicons.glyphMap;
 const TOTAL = 4;
@@ -131,6 +132,7 @@ function PageFind() {
 }
 
 function PageSeal() {
+  const ic = useIconColor();
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -227,6 +229,7 @@ export default function OnboardingScreen() {
   const [index, setIndex] = useState(0);
   const first = index === 0;
   const last = index === TOTAL - 1;
+  const ic = useIconColor();
 
   const onViewable = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
