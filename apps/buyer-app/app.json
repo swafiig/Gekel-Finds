@@ -3,7 +3,7 @@
     "name": "Gekel Finds",
     "slug": "buyer-app",
     "scheme": "gekelfinds",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "automatic",
@@ -23,10 +23,12 @@
     "web": {
       "favicon": "./assets/logo.png"
     },
-    "plugins": [
-      "expo-status-bar",
-      "expo-secure-store"
-    ],
+"plugins": [
+  "expo-status-bar",
+  "expo-secure-store",
+  "expo-notifications",
+  ["expo-navigation-bar", { "enforceContrast": false }]
+],
     "extra": {
       "eas": {
         "projectId": "bc76849c-26d4-4d57-8dda-964a1b80ff56"

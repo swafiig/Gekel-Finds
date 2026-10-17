@@ -1,5 +1,5 @@
 import "./global.css";
-import React, { useEffect } from "react";
+import React, { use, useEffect } from "react";
 import { Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
@@ -17,6 +17,7 @@ import { OfflineProvider } from "./src/context/OfflineContext";
 import RootNavigator from "./src/navigation/RootNavigator";
 import OfflineBanner from "./src/components/OfflineBanner";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { usePushNotifications } from "./src/hooks/usePushNotifications";
 
 const lightTheme = {
   ...DefaultTheme,
@@ -35,7 +36,7 @@ const darkTheme = {
 /** Picks the navigation theme and status bar style once ThemeProvider has resolved the scheme. */
 function Themed() {
   const { scheme } = useTheme();
-
+  usePushNotifications();
   useEffect(() => {
     if (Platform.OS === "android") {
       NavigationBar.setStyle(scheme === "dark" ? "light" : "dark");
