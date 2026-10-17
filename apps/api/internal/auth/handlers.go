@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/geofreysakayo/gekel-finds-auth/internal/httpx"
+	"github.com/geofreysakayo/gekel-finds-auth/internal/notifications"
 )
 
 type Handler struct {
@@ -128,11 +129,30 @@ func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
 		h.WriteError(w, r, ErrInvalidCredentials)
 		return
 	}
+	
+
 	u, t, err := h.Svc.Login(r.Context(), in.Identifier, in.Password, h.meta(r))
 	if err != nil {
 		h.WriteError(w, r, err)
 		return
 	}
+
+
+	go func() {
+		notifications.SendAndSave(
+			context.Background(),
+			h.Svc.Store.DB,
+			h.Log,
+			u.ID,
+			u.ExpoPushToken,
+			"Welcome back! 👋",
+			"Karibu GEKEL Finds. Ready to find something today?",
+			"system",
+			"",
+		)
+	}()
+
+	
 	httpx.JSON(w, http.StatusOK, AuthResponse{User: u, Tokens: t})
 }
 

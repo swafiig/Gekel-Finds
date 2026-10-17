@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -232,5 +233,48 @@ func (h Handler) UpdatePushToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 4. Return 204 No Content
+	httpx.NoContent(w)
+}
+
+type notificationItem struct {
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	Body      string    `json:"body"`
+	Type      string    `json:"type"`
+	RefID     string    `json:"reference_id,omitempty"`
+	IsRead    bool      `json:"is_read"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// ListNotifications returns the user's in-app notification history.
+func (h Handler) ListNotifications(w http.ResponseWriter, r *http.Request) {
+	c, _ := auth.ClaimsFrom(r.Context())
+	rows, err := h.st().DB.Query(r.Context(), `
+		SELECT id, title, body, type, COALESCE(reference_id, ''), is_read, created_at
+		FROM user_notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50`, c.UserID)
+	if err != nil {
+		h.Auth.WriteError(w, r, err)
+		return
+	}
+	defer rows.Close()
+
+	out := []notificationItem{}
+	for rows.Next() {
+		var n notificationItem
+		if err := rows.Scan(&n.ID, &n.Title, &n.Body, &n.Type, &n.RefID, &n.IsRead, &n.CreatedAt); err == nil {
+			out = append(out, n)
+		}
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{"notifications": out})
+}
+
+// MarkNotificationsRead sets is_read = true for all of the user's notifications.
+func (h Handler) MarkNotificationsRead(w http.ResponseWriter, r *http.Request) {
+	c, _ := auth.ClaimsFrom(r.Context())
+	_, err := h.st().DB.Exec(r.Context(), `UPDATE user_notifications SET is_read = TRUE WHERE user_id = $1`, c.UserID)
+	if err != nil {
+		h.Auth.WriteError(w, r, err)
+		return
+	}
 	httpx.NoContent(w)
 }
