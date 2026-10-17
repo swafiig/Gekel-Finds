@@ -1,5 +1,5 @@
 import "./global.css";
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";

@@ -12,7 +12,7 @@ export interface AppNotification {
   created_at: string;
 }
 
-export function useNotifications() {
+export function usePushNotifications() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
 
