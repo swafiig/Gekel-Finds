@@ -20,6 +20,7 @@ import { useAppData } from "../../context/AppDataContext";
 import { CATEGORIES } from "../../data/mock";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 /**
  * Ask GEKEL: the "I don't want to browse, just find it for me" path.
@@ -28,6 +29,7 @@ import type { RootStackParamList } from "../../types/navigation";
  */
 export default function AskGekelScreen() {
   const nav = useNav();
+  const ic = useIconColor();
   const prefill =
     useRoute<RouteProp<RootStackParamList, "AskGekel">>().params?.prefill;
   const { addRequest } = useAppData();
@@ -100,7 +102,7 @@ export default function AskGekelScreen() {
           className="text-base text-ink dark:text-sink"
           style={{ minHeight: 70, textAlignVertical: "top" }}
           placeholder="Black hoodie, size L, plain with no logo"
-          placeholderTextcolor={ic.faint}
+          placeholderTextColor={ic.faint}
           value={title}
           onChangeText={(t) => {
             setTitle(t);

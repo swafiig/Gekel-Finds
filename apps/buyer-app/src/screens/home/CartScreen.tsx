@@ -20,6 +20,7 @@ import {
   formatKsh,
 } from "../../data/mock";
 import { useNav } from "../../hooks/useNav";
+import { useIconColor } from "../../hooks/useIconColor";
 
 const STD: DeliveryChoice = {
   method: "rider",
@@ -31,6 +32,7 @@ const STD: DeliveryChoice = {
 /** Lines from many shops live in one cart. Wholesale prices apply automatically when a line reaches the minimum. */
 export default function CartScreen() {
   const nav = useNav();
+  const ic = useIconColor();
   const { cart, setCartQty, removeFromCart, toggleCartSelect, selectAllCart } =
     useAppData();
 

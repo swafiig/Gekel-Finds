@@ -8,12 +8,14 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import Button from "../../components/Button";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
+import { useIconColor } from "../../hooks/useIconColor";
 
 const NAIROBI = { latitude: -1.2864, longitude: 36.8172 };
 
 /** Drag the map under the fixed pin, then confirm. Returns the coordinates to the address form. */
 export default function MapPickerScreen() {
   const nav = useNav();
+  const ic = useIconColor();
   const { lat, lng } =
     useRoute<RouteProp<RootStackParamList, "MapPicker">>().params ?? {};
   const start: Region = {
