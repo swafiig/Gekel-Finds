@@ -87,15 +87,13 @@ func Router(d Deps) http.Handler {
 		/* DEV ONLY: Trigger a test notification */
 	mux.Handle("POST /api/v1/users/test-notification", protect(func(w http.ResponseWriter, r *http.Request) {
 		claims, _ := auth.ClaimsFrom(r.Context())
-		
-		// Fetch the user to get their push token (now includes ExpoPushToken via userCols)
+
 		user, err := d.Users.Auth.Svc.Store.UserByID(r.Context(), claims.UserID)
 		if err != nil {
 			httpx.Error(w, r, http.StatusInternalServerError, "db_error", "Could not fetch user", nil)
 			return
 		}
 
-		// Send the notification
 		notifications.Send(
 			user.ExpoPushToken,
 			"GEKEL Test 🚀",
@@ -106,7 +104,6 @@ func Router(d Deps) http.Handler {
 
 		httpx.JSON(w, http.StatusOK, map[string]string{"status": "sent"})
 	}))
-	
 
 	/* users */
 
