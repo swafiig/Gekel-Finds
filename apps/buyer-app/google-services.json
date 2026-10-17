@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "132089412749",
+    "project_id": "gekelfinds",
+    "storage_bucket": "gekelfinds.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132089412749:android:2af9eaaec272f6466876c4",
+        "android_client_info": {
+          "package_name": "com.gekelfinds.buyer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ_gk2yG3uTQwYHVhNpxFMb3BUON0UI5c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

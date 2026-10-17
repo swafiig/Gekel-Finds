@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+firebase-admin-sdk.json
+gekelfinds-firebase-adminsdk-fbsvc-8d534ac6e3.json
+firebase-admin-sdk.json

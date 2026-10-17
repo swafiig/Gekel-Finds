@@ -12,6 +12,7 @@
       "bundleIdentifier": "com.gekelfinds.buyer"
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FA3504",
         "foregroundImage": "./assets/logo.png"
@@ -23,12 +24,12 @@
     "web": {
       "favicon": "./assets/logo.png"
     },
-"plugins": [
-  "expo-status-bar",
-  "expo-secure-store",
-  "expo-notifications",
-  ["expo-navigation-bar", { "enforceContrast": false }]
-],
+    "plugins": [
+      "expo-status-bar",
+      "expo-secure-store",
+      "expo-notifications",
+      ["expo-navigation-bar", { "enforceContrast": false }]
+    ],
     "extra": {
       "eas": {
         "projectId": "bc76849c-26d4-4d57-8dda-964a1b80ff56"

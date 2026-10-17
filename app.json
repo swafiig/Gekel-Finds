@@ -6,7 +6,13 @@
       }
     },
     "android": {
-      "package": "com.gekelfinds.buyer"
-    }
+  "package": "com.gekelfinds.buyer",
+  "googleServicesFile": "./google-services.json",
+  "adaptiveIcon": {
+    "backgroundColor": "#FA3504",
+    "foregroundImage": "./assets/logo.png"
+  },
+  "softwareKeyboardLayoutMode": "resize"
+}
   }
 }
