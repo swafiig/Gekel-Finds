@@ -71,8 +71,6 @@ func Router(d Deps) http.Handler {
 	mux.Handle("POST /api/v1/auth/verify-otp", public(a.VerifyOTP, rl("verify_otp", 40, 15*time.Minute)))
 	mux.Handle("POST /api/v1/auth/reset-password", public(a.ResetPassword, rl("reset", 10, 15*time.Minute)))
 
-	/* public reference data */
-	mux.HandleFunc("GET /api/v1/categories", catalog.Handler{}.List)
 
 	/* signed-in endpoints */
 	u := d.Users
