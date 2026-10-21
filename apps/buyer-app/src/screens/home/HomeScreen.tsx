@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   View,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +19,7 @@ import AddressSheet from "../../components/AddressSheet";
 import { FlashTimer } from "../../components/FlashTimer";
 import { useAuth } from "../../context/AuthContext";
 import { useUI } from "../../context/UIContext";
+import { useCategories } from "../../hooks/useCategories";
 import {
   useAppData,
   requestNote,
@@ -25,13 +27,7 @@ import {
   isActive,
   orderStages,
 } from "../../context/AppDataContext";
-import {
-  CATEGORIES,
-  GREETINGS,
-  MARKET_STATUS,
-  PRODUCTS,
-  SUPPLIERS,
-} from "../../data/mock";
+import { GREETINGS, MARKET_STATUS, PRODUCTS, SUPPLIERS } from "../../data/mock";
 import { formatKm, haversineKm } from "../../utils/geo";
 import { useNav } from "../../hooks/useNav";
 import { useIconColor } from "../../hooks/useIconColor";
@@ -44,6 +40,7 @@ const TONE = {
 
 export default function HomeScreen() {
   const nav = useNav();
+  const { categories } = useCategories();
   const ic = useIconColor();
   const { user, justRegistered, clearJustRegistered } = useAuth();
   const { openMenu } = useUI();
@@ -271,19 +268,22 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}
         >
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <Pressable
               key={c.id}
               onPress={() =>
                 nav.navigate("Main", { screen: "Finds", params: { cat: c.id } })
               }
-              style={{ backgroundColor: c.color }}
-              className="w-24 items-center rounded-2xl p-3"
+              className="w-28 overflow-hidden rounded-2xl bg-white dark:bg-surface border border-line dark:border-surface-line"
             >
-              <Ionicons name={c.icon as any} size={22} color={ic.muted} />
+              <Image
+                source={{ uri: c.image_url }}
+                className="h-20 w-full"
+                resizeMode="cover"
+              />
               <Text
-                numberOfLines={2}
-                className="mt-1.5 text-center text-[11px] font-bold leading-4 text-ink"
+                numberOfLines={1}
+                className="p-2 text-center text-xs font-bold text-ink dark:text-sink"
               >
                 {c.name}
               </Text>

@@ -13,8 +13,10 @@ import (
 	"github.com/geofreysakayo/gekel-finds-auth/docs"
 	"github.com/geofreysakayo/gekel-finds-auth/internal/auth"
 	"github.com/geofreysakayo/gekel-finds-auth/internal/catalog"
+
 	"github.com/geofreysakayo/gekel-finds-auth/internal/config"
 	"github.com/geofreysakayo/gekel-finds-auth/internal/httpx"
+	"github.com/geofreysakayo/gekel-finds-auth/internal/products"
 	"github.com/geofreysakayo/gekel-finds-auth/internal/users"
 )
 
@@ -86,6 +88,13 @@ func Router(d Deps) http.Handler {
 	mux.Handle("POST /api/v1/users/push-token", protect(u.UpdatePushToken))
 	mux.Handle("GET /api/v1/notifications", protect(u.ListNotifications))
 	mux.Handle("POST /api/v1/notifications/read", protect(u.MarkNotificationsRead))
+	catHandler := catalog.Handler{DB: d.DB}
+	prodHandler := products.Handler{DB: d.DB}
+	
+	mux.HandleFunc("GET /api/v1/categories", catHandler.List)
+	mux.HandleFunc("GET /api/v1/categories/subcategories", catHandler.ListSubcategories)
+	mux.HandleFunc("GET /api/v1/products", prodHandler.ListProducts)
+	mux.HandleFunc("GET /api/v1/suppliers", prodHandler.ListSuppliers)
 
 	/* users */
 

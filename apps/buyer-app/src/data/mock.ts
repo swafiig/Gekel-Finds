@@ -72,6 +72,7 @@ export interface Product {
 
 /* ─────────── Categories: unique Kenyan aisles, not a copy of any other app's menu ─────────── */
 export interface Category {
+  [x: string]: any;
   id: string;
   name: string;
   subtitle: string;
