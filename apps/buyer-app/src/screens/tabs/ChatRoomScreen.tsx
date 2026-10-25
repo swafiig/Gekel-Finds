@@ -25,6 +25,7 @@ import { isKenyanPhone } from "../../utils/validation";
 import { useNav } from "../../hooks/useNav";
 import type { RootStackParamList } from "../../types/navigation";
 import { useIconColor } from "../../hooks/useIconColor";
+import { api } from "../../services/http";
 
 const QUICK = [
   "Is it available?",
@@ -234,7 +235,8 @@ function PayCard({
 
 export default function ChatRoomScreen() {
   const nav = useNav();
-  const { id } = useRoute<RouteProp<RootStackParamList, "ChatRoom">>().params;
+  const route = useRoute<RouteProp<RootStackParamList, "ChatRoom">>();
+  const { id, prefillQuote } = route.params;
   const { chats, orders, sendMessage, markChatRead, attachPayment } =
     useAppData();
   const { outbox } = useOffline();
@@ -251,6 +253,32 @@ export default function ChatRoomScreen() {
   const [proofText, setProofText] = useState("");
   const [proofImg, setProofImg] = useState<string>();
   const ic = useIconColor();
+
+  // Auto-send quote request on mount if prefillQuote is present
+  useEffect(() => {
+    if (!prefillQuote) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await api.post(`/chats/${id}/messages`, {
+          body: "",
+          kind: "quote_request",
+          product_id: prefillQuote.productId,
+          qty: prefillQuote.qty,
+          budget: prefillQuote.budget,
+        });
+        if (!cancelled) {
+          nav.setParams({ prefillQuote: undefined });
+        }
+      } catch (e) {
+        console.error("quote_request send failed", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     markChatRead(id);
@@ -295,6 +323,36 @@ export default function ChatRoomScreen() {
     const order = m.orderId
       ? orders.find((o) => o.id === m.orderId)
       : undefined;
+
+    // NEW: quote_request card
+    if (m.kind === ("quote_request" as any)) {
+      const meta = (() => {
+        try {
+          return JSON.parse(m.text || "{}");
+        } catch {
+          return {};
+        }
+      })();
+      return (
+        <View className="mb-3 w-[86%] self-end rounded-2xl border border-brand-200 bg-brand-50 p-4">
+          <Text className="text-xs font-bold tracking-widest text-brand-700">
+            QUOTE REQUEST
+          </Text>
+          <Text className="mt-1 text-base font-bold text-ink dark:text-sink">
+            {meta.qty ?? "?"} pieces
+          </Text>
+          {meta.budget ? (
+            <Text className="mt-1 text-sm text-ink-soft dark:text-sink-soft">
+              Target total: {formatKsh(meta.budget)}
+            </Text>
+          ) : null}
+          <Text className="mt-2 text-xs text-ink-mute dark:text-sink-mute">
+            Waiting for the shop to reply with a price.
+          </Text>
+        </View>
+      );
+    }
+
     if (m.kind === "quote") return <QuoteCard m={m} order={order} />;
     if (m.kind === "till")
       return <PayCard m={m} order={order} onAttach={() => setSheet(true)} />;
@@ -318,6 +376,7 @@ export default function ChatRoomScreen() {
         </View>
       );
     }
+
     const queued =
       mine &&
       outbox.some(
@@ -328,7 +387,11 @@ export default function ChatRoomScreen() {
       );
     return (
       <View
-        className={`mb-2 max-w-[80%] overflow-hidden rounded-2xl ${mine ? "self-end rounded-br-sm bg-brand-500" : "self-start rounded-bl-sm border border-line dark:border-surface-line bg-white dark:bg-surface"}`}
+        className={`mb-2 max-w-[80%] overflow-hidden rounded-2xl ${
+          mine
+            ? "self-end rounded-br-sm bg-brand-500"
+            : "self-start rounded-bl-sm border border-line dark:border-surface-line bg-white dark:bg-surface"
+        }`}
       >
         {m.imageUri ? (
           <Image
@@ -339,7 +402,9 @@ export default function ChatRoomScreen() {
         ) : null}
         {m.text && !(m.imageUri && m.text === "Photo") ? (
           <Text
-            className={`px-4 pt-2.5 text-base ${queued ? "" : "pb-2.5"} ${mine ? "text-white" : "text-ink dark:text-sink"}`}
+            className={`px-4 pt-2.5 text-base ${
+              queued ? "" : "pb-2.5"
+            } ${mine ? "text-white" : "text-ink dark:text-sink"}`}
           >
             {m.text}
           </Text>

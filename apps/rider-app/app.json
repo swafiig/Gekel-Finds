@@ -1,25 +1,62 @@
 {
   "expo": {
-    "name": "rider-app",
-    "slug": "rider-app",
-    "version": "1.0.0",
+    "name": "GEKEL Rider",
+    "slug": "gekel-rider",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "gekel",
     "userInterfaceStyle": "light",
+   
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "co.gekel.rider",
+      "infoPlist": {
+        "NSCameraUsageDescription": "GEKEL uses the camera to scan seal codes and take pickup and delivery proof photos.",
+        "NSLocationWhenInUseUsageDescription": "GEKEL shares your live position with the customer while you are on a delivery."
+      }
     },
     "android": {
+      "package": "co.gekel.rider",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FA3504"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "plugins": [
+  "expo-secure-store",
+  [
+    "expo-image-picker",
+    {
+      "photosPermission": "Allow GEKEL to access your photos.",
+      "cameraPermission": "Allow GEKEL to use the camera."
     }
+  ],
+  [
+    "expo-location",
+    {
+      "locationAlwaysAndWhenInUsePermission": "Allow GEKEL to use your location while delivering."
+    }
+  ],
+  [
+    "expo-camera",
+    {
+      "cameraPermission": "Allow GEKEL to use the camera."
+    }
+  ],
+  [
+    "expo-splash-screen",
+    {
+      "image": "./assets/splash-mark.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FA3504"
+    }
+  ]
+]
   }
 }

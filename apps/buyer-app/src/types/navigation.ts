@@ -1,17 +1,42 @@
-import type { NavigatorScreenParams } from '@react-navigation/native';
+import type { NavigatorScreenParams } from "@react-navigation/native";
 
-export type MainTabParamList = { Home: undefined; Orders: undefined; Finds: { q?: string; cat?: string } | undefined; Chat: undefined; Profile: undefined };
+export type MainTabParamList = {
+  Home: undefined;
+  Orders: undefined;
+  Finds: { q?: string; cat?: string } | undefined;
+  Chat: undefined;
+  Profile: undefined;
+};
 
 export type RootStackParamList = {
-  Onboarding: undefined; Welcome: undefined; Login: undefined; Register: undefined; ForgotPassword: undefined;
-  VerifyOtp: { identifier: string }; ResetPassword: { resetToken: string };
+  Onboarding: undefined;
+  Welcome: undefined;
+  Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
+  VerifyOtp: { identifier: string };
+  ResetPassword: { resetToken: string };
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
-  AskGekel: { prefill?: string } | undefined; OwnSupplier: undefined; RequestDetail: { id: string }; Requests: undefined;
+  AskGekel: { prefill?: string } | undefined;
+  OwnSupplier: undefined;
+  RequestDetail: { id: string };
+  Requests: undefined;
   ProductDetail: { id: string };
   Cart: undefined;
-  Checkout: { lines: { productId: string; qty: number }[]; fromCart?: boolean };
+  Checkout: {
+    lines: { productId: string; qty: number }[];
+    fromCart?: boolean;
+  };
   Bundle: { id: string };
-  OrderDetail: { id: string }; ChatRoom: { id: string };
+  OrderDetail: { id: string };
+  ChatRoom: {
+    id: string;
+    prefillQuote?: {
+      productId: string;
+      qty: number;
+      budget: number;
+    };
+  };
   Suppliers: { market?: string; retailOnly?: boolean } | undefined;
   SupplierProfile: { id: string };
   Call: { name: string; role?: string; limitSeconds?: number };

@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import { Alert, Pressable, ScrollView, Share, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  Share,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -40,19 +49,55 @@ export default function ProductDetailScreen() {
   const supplier = SUPPLIERS.find((s) => s.id === product.supplierId)!;
   const fav = favorites.includes(id);
   const followed = following.includes(supplier.id);
-  const [qty, setQty] = useState(1);
 
-  const w = product.wholesale; // every GEKEL seller does wholesale
+  const [qty, setQty] = useState(1);
+  const [quoteOpen, setQuoteOpen] = useState(false);
+  const [quoteQty, setQuoteQty] = useState("1");
+  const [quoteBudget, setQuoteBudget] = useState("");
+
+  const ic = useIconColor();
+  const w = product.wholesale;
   const unit = unitPriceFor(id, qty);
   const items = unit * qty;
   const isWholesale = modeFor(id, qty) === "wholesale";
-  const ic = useIconColor();
   const chamaNeed = w?.minQty ?? 0;
+
+  // Bulk detection
+  const moq = w?.minQty ?? Infinity;
+  const isBulk = qty >= moq;
+  const isClearlyBulk = qty >= moq * 2 || items >= 50000;
+
+  // Auto-open quote modal when buyer clearly wants bulk
+  useEffect(() => {
+    if (isClearlyBulk) setQuoteOpen(true);
+  }, [isClearlyBulk]);
+
+  // Prefill the modal whenever it opens
+  useEffect(() => {
+    if (quoteOpen) {
+      setQuoteQty(String(qty));
+      setQuoteBudget(String(qty * product.price));
+    }
+  }, [quoteOpen, qty, product.price]);
 
   const inviteFriends = () =>
     Share.share({
-      message: `Join my Chama Buy on GEKEL: ${product.name} at ${formatKsh(w!.unitPrice)} each when we reach ${chamaNeed}. Tap to join.`,
+      message: `Join my Chama Buy on GEKEL: ${product.name} at ${formatKsh(
+        w!.unitPrice,
+      )} each when we reach ${chamaNeed}. Tap to join.`,
     });
+
+  const submitQuote = () => {
+    const q = parseInt(quoteQty, 10) || 0;
+    const b = parseInt(quoteBudget, 10) || 0;
+    if (!q) return;
+    setQuoteOpen(false);
+    const chatId = openSupplierChat(supplier.id);
+    nav.navigate("ChatRoom", {
+      id: chatId,
+      prefillQuote: { productId: id, qty: q, budget: b },
+    });
+  };
 
   return (
     <SafeAreaView
@@ -123,7 +168,6 @@ export default function ProductDetailScreen() {
             {product.description}
           </Text>
 
-          {/* Compare prices: a reason to trust GEKEL's number, with no competitor named */}
           {product.compare && (
             <View className="mt-5 rounded-2xl border border-line dark:border-surface-line bg-cream dark:bg-surface-soft p-4">
               <View className="flex-row items-center justify-between">
@@ -166,7 +210,10 @@ export default function ProductDetailScreen() {
                   <View className="mt-1 h-2 overflow-hidden rounded-full bg-line dark:bg-surface-line">
                     <View
                       style={{
-                        width: `${Math.min(100, (value / product.compare!.retailShop) * 100)}%`,
+                        width: `${Math.min(
+                          100,
+                          (value / product.compare!.retailShop) * 100,
+                        )}%`,
                       }}
                       className={`h-full rounded-full ${bar}`}
                     />
@@ -226,7 +273,9 @@ export default function ProductDetailScreen() {
               accessibilityLabel={
                 followed ? "Unfollow supplier" : "Follow supplier"
               }
-              className={`mr-2 h-9 flex-row items-center rounded-full px-3 ${followed ? "bg-cream dark:bg-surface-soft" : "bg-brand-50"}`}
+              className={`mr-2 h-9 flex-row items-center rounded-full px-3 ${
+                followed ? "bg-cream dark:bg-surface-soft" : "bg-brand-50"
+              }`}
             >
               <Ionicons
                 name={followed ? "checkmark" : "add"}
@@ -252,7 +301,6 @@ export default function ProductDetailScreen() {
             </Pressable>
           </View>
 
-          {/* warranty */}
           {product.warranty && (
             <View className="mt-3 flex-row items-start rounded-2xl bg-green-50 p-3">
               <Ionicons
@@ -280,7 +328,9 @@ export default function ProductDetailScreen() {
                 disabled={qty <= 1}
                 onPress={() => setQty(qty - 1)}
                 accessibilityLabel="Decrease"
-                className={`h-10 w-10 items-center justify-center rounded-full border border-line dark:border-surface-line ${qty <= 1 ? "opacity-40" : ""}`}
+                className={`h-10 w-10 items-center justify-center rounded-full border border-line dark:border-surface-line ${
+                  qty <= 1 ? "opacity-40" : ""
+                }`}
               >
                 <Ionicons name="remove" size={18} color={ic.primary} />
               </Pressable>
@@ -296,10 +346,13 @@ export default function ProductDetailScreen() {
               </Pressable>
             </View>
           </View>
+
           {w && (
             <Pressable
               onPress={() => setQty(Math.max(qty, w.minQty))}
-              className={`mt-3 flex-row items-center rounded-2xl p-3 ${isWholesale ? "bg-green-50" : "bg-brand-50"}`}
+              className={`mt-3 flex-row items-center rounded-2xl p-3 ${
+                isWholesale ? "bg-green-50" : "bg-brand-50"
+              }`}
             >
               <Ionicons
                 name="layers"
@@ -308,9 +361,29 @@ export default function ProductDetailScreen() {
               />
               <Text className="ml-2 flex-1 text-sm text-ink">
                 {isWholesale
-                  ? `Wholesale price applied: ${formatKsh(w.unitPrice)} each. You save ${formatKsh((product.price - w.unitPrice) * qty)}.`
-                  : `Buy ${w.minQty}+ for ${formatKsh(w.unitPrice)} each. Tap to jump to ${w.minQty}.`}
+                  ? `Wholesale price applied: ${formatKsh(
+                      w.unitPrice,
+                    )} each. You save ${formatKsh(
+                      (product.price - w.unitPrice) * qty,
+                    )}.`
+                  : `Buy ${w.minQty}+ for ${formatKsh(
+                      w.unitPrice,
+                    )} each. Tap to jump to ${w.minQty}.`}
               </Text>
+            </Pressable>
+          )}
+
+          {/* Ask quote prompt for bulk */}
+          {w && qty >= w.minQty && (
+            <Pressable
+              onPress={() => setQuoteOpen(true)}
+              className="mt-3 flex-row items-center rounded-2xl border border-brand-300 bg-brand-50 p-3"
+            >
+              <Ionicons name="chatbubbles-outline" size={18} color="#FA3504" />
+              <Text className="ml-2 flex-1 text-sm font-bold text-brand-700">
+                Want a better price for {qty} pieces? Ask for a quote
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color="#FA3504" />
             </Pressable>
           )}
 
@@ -373,28 +446,111 @@ export default function ProductDetailScreen() {
         </View>
       </ScrollView>
 
-      <View className="flex-row gap-3 border-t border-line dark:border-surface-line bg-white dark:bg-surface px-5 pt-3">
-        <Button
-          title="Add to cart"
-          icon="cart-outline"
-          variant="outline"
-          className="h-14 flex-1"
-          onPress={() => {
-            addToCart(id, qty);
-            Alert.alert("Added to cart", `${qty} × ${product.name}`, [
-              { text: "Keep browsing", style: "cancel" },
-              { text: "View cart", onPress: () => nav.navigate("Cart") },
-            ]);
-          }}
-        />
-        <Button
-          title={`Order · ${formatKsh(items)}`}
-          className="h-14 flex-[1.4]"
-          onPress={() =>
-            nav.navigate("Checkout", { lines: [{ productId: id, qty }] })
-          }
-        />
+      {/* Bottom bar */}
+      <View className="border-t border-line dark:border-surface-line bg-white dark:bg-surface px-5 pt-3">
+        {w && qty >= w.minQty && (
+          <Pressable
+            onPress={() => setQuoteOpen(true)}
+            className="mb-2 flex-row items-center justify-center rounded-2xl border border-brand-300 bg-brand-50 py-2.5"
+          >
+            <Ionicons name="chatbubbles-outline" size={16} color="#FA3504" />
+            <Text className="ml-2 text-sm font-bold text-brand-700">
+              Ask for a bulk quote
+            </Text>
+          </Pressable>
+        )}
+        <View className="flex-row gap-3">
+          <Button
+            title="Add to cart"
+            icon="cart-outline"
+            variant="outline"
+            className="h-14 flex-1"
+            onPress={() => {
+              addToCart(id, qty);
+              Alert.alert("Added to cart", `${qty} × ${product.name}`, [
+                { text: "Keep browsing", style: "cancel" },
+                { text: "View cart", onPress: () => nav.navigate("Cart") },
+              ]);
+            }}
+          />
+          <Button
+            title={`Request · ${formatKsh(items)}`}
+            className="h-14 flex-[1.4]"
+            onPress={() => {
+              if (isClearlyBulk) setQuoteOpen(true);
+              else
+                nav.navigate("Checkout", { lines: [{ productId: id, qty }] });
+            }}
+          />
+        </View>
       </View>
+
+      {/* Quote modal */}
+      <Modal
+        visible={quoteOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setQuoteOpen(false)}
+      >
+        <View className="flex-1 justify-end bg-black-40">
+          <Pressable className="flex-1" onPress={() => setQuoteOpen(false)} />
+          <View className="rounded-t-[28px] bg-white dark:bg-surface px-5 pb-8 pt-3">
+            <View className="mb-3 h-1.5 w-12 self-center rounded-full bg-line" />
+            <Text className="text-xl font-extrabold text-ink dark:text-sink">
+              Ask for a quote
+            </Text>
+            <Text className="mt-1 text-sm leading-5 text-ink-soft dark:text-sink-soft">
+              Tell the shop how many {product.name} you need and your target
+              total. They may give you a better rate for bulk — the shop replies
+              in chat and you can accept or walk away.
+            </Text>
+
+            <Text className="mb-2 mt-4 text-sm font-bold text-ink dark:text-sink">
+              Quantity
+            </Text>
+            <TextInput
+              value={quoteQty}
+              onChangeText={setQuoteQty}
+              keyboardType="number-pad"
+              placeholder={`e.g. ${w?.minQty ?? 10}`}
+              placeholderTextColor={ic.faint}
+              className="h-12 rounded-2xl border border-line dark:border-surface-line bg-cream dark:bg-surface-soft px-4 text-base text-ink dark:text-sink"
+            />
+
+            <Text className="mb-2 mt-4 text-sm font-bold text-ink dark:text-sink">
+              Target total (optional)
+            </Text>
+            <TextInput
+              value={quoteBudget}
+              onChangeText={setQuoteBudget}
+              keyboardType="number-pad"
+              placeholder="e.g. 7500"
+              placeholderTextColor={ic.faint}
+              className="h-12 rounded-2xl border border-line dark:border-surface-line bg-cream dark:bg-surface-soft px-4 text-base text-ink dark:text-sink"
+            />
+            <Text className="mt-1 text-xs text-ink-mute dark:text-sink-mute">
+              At retail:{" "}
+              {formatKsh((parseInt(quoteQty, 10) || 0) * product.price)}.
+              {w ? ` Wholesale rate: ${formatKsh(w.unitPrice)} each.` : ""}
+            </Text>
+
+            <View className="mt-4 flex-row gap-3">
+              <Button
+                title="Cancel"
+                variant="ghost"
+                className="h-12 flex-1"
+                onPress={() => setQuoteOpen(false)}
+              />
+              <Button
+                title="Send to shop"
+                className="h-12 flex-[1.4]"
+                disabled={!parseInt(quoteQty, 10)}
+                onPress={submitQuote}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

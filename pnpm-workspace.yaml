@@ -2,6 +2,23 @@ packages:
   - "apps/*"
   - "packages/*"
 
+overrides:
+  react-native: 0.88.0
+  react-native-css-interop: ^0.2.7
+  expo: ~58.0.19
+  expo-clipboard: ~58.0.4
+  expo-image-picker: ~58.0.10
+  expo-linking: ~58.0.14
+  expo-secure-store: ~58.0.2
+  expo-status-bar: ~58.0.4
+  react-native-reanimated: 4.7.1
+  typescript: ~6.0.3
+  react: 19.3.0
+  react-native-safe-area-context: ~5.10.1
+  react-native-screens: ~4.30.0
+  react-native-svg: 15.16.0
+  "@types/react": "~19.3.0"
+
 allowBuilds:
   unrs-resolver: false
 

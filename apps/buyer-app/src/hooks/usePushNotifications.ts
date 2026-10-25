@@ -44,12 +44,10 @@ export function usePushNotifications() {
           projectId: Constants.expoConfig?.extra?.eas?.projectId,
         });
         setExpoPushToken(token.data);
-        console.log("Expo Push Token:", token.data);
 
         if (user) {
           try {
             await api.post("/users/push-token", { token: token.data });
-            console.log("Token saved to backend");
           } catch (err) {
             console.error("Save failed:", err);
           }

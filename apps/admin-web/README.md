@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GEKEL Ops Console (Next.js)
 
-## Getting Started
+One admin web app for GEKEL operations: live hub radar, orders and dispatch, requests, supplier verification,
+riders, disputes, fee payments, rules and team, and an audit log. Black, orange and white.
 
-First, run the development server:
+**Stack:** Next.js 15 (App Router) · React 19 · Tailwind CSS 4 · TypeScript. No other runtime dependencies.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm run build && npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Routes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route | Page |
+| --- | --- |
+| `/` | Overview: radar, KPIs, alerts, live feed |
+| `/orders` | Orders table + detail drawer (`?open=<orderId>`) |
+| `/requests` | Buyer requests |
+| `/suppliers` | Review queue, verified, suspended (`?id=<supplierId>`) |
+| `/riders` | Dispatch queue + riders (`?open=<riderId>`) |
+| `/disputes` | Cases, evidence, rulings (`?id=DIS-882`) |
+| `/payments` | GEKEL fee stream and unmatched payments |
+| `/rules` | Fee and dispatch rules, team, roles |
+| `/audit` | Audit log |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure
 
-## Learn More
+```
+src/app            routes, layout, globals.css (design tokens, light + dark)
+src/components     Shell (sidebar, top bar, search), Overlay (toasts, dialogs, drawers), ui, icons
+src/features       one component per page, plus shared dialogs
+src/lib            types, constants, seed data, store + live engine, actions
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Sample data
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Everything runs on in-memory sample data (`src/lib/seed.ts`) with a simulated live engine (`tickEngine` in `store.ts`).
+It is created on the client after load, so nothing is fetched. To connect a real backend, replace the functions in
+`src/lib/actions.ts` and the reads in `src/lib/store.ts` with API calls; the pages only use those two modules.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Business rules the console follows
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Buyers pay the supplier's Till directly. GEKEL never holds item money; rulings that return item money are paid by the supplier.
+- GEKEL's own fee is collected separately by Daraja STK push and reconciled under Payments.
+- Permissions: Super admin, Ops lead, Support, Verifier, Finance. "View as another role" in the top bar previews them.

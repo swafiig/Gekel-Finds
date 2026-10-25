@@ -1,25 +1,47 @@
 {
   "expo": {
-    "name": "supplier-app",
-    "slug": "supplier-app",
-    "version": "1.0.0",
+    "name": "GEKEL Seller",
+    "slug": "gekel-seller",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "gekel",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "co.gekel.seller",
+      "infoPlist": {
+        "NSCameraUsageDescription": "GEKEL uses the camera for product and packing proof photos.",
+        "NSPhotoLibraryUsageDescription": "GEKEL lets you pick product photos from your library."
+      }
     },
     "android": {
+      "package": "co.gekel.seller",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FA3504"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": [
+        "CAMERA"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+        "plugins": [
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow GEKEL to access your photos for product images.",
+          "cameraPermission": "Allow GEKEL to use the camera for product and packing proof photos."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-mark.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FA3504"
+        }
+      ]
+    ]
   }
 }
