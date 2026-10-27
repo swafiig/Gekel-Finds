@@ -34,3 +34,42 @@ export function Chips<T extends string>({ items, value, onChange }: { items: [T,
   return (<div className="chips" role="group">{items.map(([k, l, n]) => <button key={k} className="chip" aria-pressed={value === k} onClick={() => onChange(k)}>{l} <span className="n">{n}</span></button>)}</div>);
 }
 export const NavLink = Link;
+
+export function Kpi({ k, v, d, tone }: { k: string; v: ReactNode; d?: ReactNode; tone?: "up" | "down" | "flat" }) {
+  return (<div className="card kpi"><span className="k">{k}</span><span className="v num">{v}</span>{d && <span className={`d ${tone ?? "flat"}`}>{d}</span>}</div>);
+}
+export function Toggle({ on, onChange, label, disabled }: { on: boolean; onChange: (v: boolean) => void; label: string; disabled?: boolean }) {
+  return (<button type="button" role="switch" aria-checked={on} aria-label={label} disabled={disabled} className="toggle" onClick={() => onChange(!on)}><i /></button>);
+}
+/** A simple vertical stage tracker. `at` is the current stage index. */
+export function Stages({ stages, at, closed }: { stages: readonly string[]; at: number; closed?: boolean }) {
+  const fin = at >= stages.length - 1 && !closed;
+  return (<div className="tl">{stages.map((s, i) => { const done = i < at || (fin && i === at); return (
+    <div key={s} className={`s ${done ? "done" : i === at && !closed ? "cur" : "todo"}`}><span className="m">{done ? <Icon name="check" small /> : null}</span><div><b>{s}</b></div></div>); })}</div>);
+}
+export const Field = ({ id, label, hint, error, children }: { id: string; label: string; hint?: string; error?: string; children: ReactNode }) => (
+  <div className="field"><label htmlFor={id}>{label}</label>{children}{hint && !error && <span className="hint">{hint}</span>}{error && <span className="errtxt">{error}</span>}</div>
+);
+
+export interface Col<T> { key: keyof T & string; label: string; type: "text" | "number" | "toggle" | "select" | "date"; options?: string[]; unit?: string; width?: number; hint?: string }
+/** An editable table. Edits go to the draft held by the page; nothing is saved until the page's save bar is used. */
+export function EditTable<T extends { id: string }>({ rows, cols, onChange, make, addLabel, disabled, emptyText }: { rows: T[]; cols: Col<T>[]; onChange: (r: T[]) => void; make?: () => T; addLabel?: string; disabled?: boolean; emptyText?: string }) {
+  const set = (i: number, k: string, v: unknown) => onChange(rows.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
+  return (
+    <div>
+      <div className="tw"><table className="t et"><thead><tr>{cols.map((c) => <th key={c.key} className={c.type === "number" ? "r" : ""} title={c.hint}>{c.label}{c.unit ? ` (${c.unit})` : ""}</th>)}<th /></tr></thead>
+        <tbody>{rows.map((r, i) => (
+          <tr key={r.id}>{cols.map((c) => { const v = r[c.key] as unknown; return (
+            <td key={c.key} className={c.type === "number" ? "r" : ""}>
+              {c.type === "toggle" ? <Toggle on={!!v} onChange={(x) => set(i, c.key, x)} label={`${c.label}, row ${i + 1}`} disabled={disabled} />
+                : c.type === "select" ? <select className="input" aria-label={c.label} disabled={disabled} value={String(v)} onChange={(e) => set(i, c.key, e.target.value)}>{c.options!.map((o) => <option key={o}>{o}</option>)}</select>
+                : c.type === "number" ? <input className="input num" type="number" min={0} step="any" aria-label={c.label} disabled={disabled} style={{ width: c.width ?? 100, textAlign: "right" }} value={Number(v)} onChange={(e) => set(i, c.key, parseFloat(e.target.value) || 0)} />
+                : <input className="input" type="text" aria-label={c.label} disabled={disabled} style={{ minWidth: c.width ?? 120 }} value={String(v ?? "")} onChange={(e) => set(i, c.key, e.target.value)} />}
+            </td>); })}
+            <td className="r">{!disabled && <button className="btn sm ghost" aria-label={`Remove row ${i + 1}`} onClick={() => onChange(rows.filter((_, j) => j !== i))}><Icon name="trash" small /></button>}</td></tr>))}
+          {!rows.length && <tr><td colSpan={cols.length + 1} className="muted">{emptyText ?? "Nothing here yet."}</td></tr>}
+        </tbody></table></div>
+      {make && !disabled && <div className="px-3.5 py-3"><button className="btn sm" onClick={() => onChange([...rows, make()])}><Icon name="plus" small /> {addLabel ?? "Add row"}</button></div>}
+    </div>
+  );
+}

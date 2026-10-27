@@ -11,3 +11,7 @@ export const needsAction = (o: Order) => {
 export const scoreTone = (s = 0) => (s >= 90 ? "ok" : s >= 80 ? "acc" : "bad") as "ok" | "acc" | "bad";
 export const dueTone = (d: number) => (d <= 7 ? "bad" : d <= 30 ? "warn" : "ok") as "bad" | "warn" | "ok";
 export type { Dispute, Rider, Supplier };
+
+import { staffList } from "@/lib/auth";
+export const finders = () => staffList().filter((s) => s.status === "active" && (s.role === "Sourcing agent" || s.role === "Ops lead")).map((s) => s.name);
+export const dayOf = (t: number) => Math.min(3, 1 + Math.floor((Date.now() - t) / 86400000));

@@ -17,7 +17,7 @@ function Sla({ d }: { d: Dispute }) {
   return <span className={m < 25 ? "age hot" : m < 60 ? "age warm" : "age"}>{m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`} left</span>;
 }
 
-export default function Disputes() {
+export default function Disputes({ embedded }: { embedded?: boolean }) {
   const db = useDb()!; const sp = useSearchParams(); const router = useRouter(); const path = usePathname();
   const param = sp.get("id"); const [tab, setTab] = useState<"open" | "done">("open"); const [selId, setSelId] = useState<string | null>(param);
   useEffect(() => { if (param) { const d = db.disputes.find((x) => x.id === param); if (d) { setTab(d.status === "resolved" ? "done" : "open"); setSelId(param); } } }, [param]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -25,7 +25,7 @@ export default function Disputes() {
   const rows = tab === "open" ? open : done; const d = rows.find((x) => x.id === selId) ?? rows[0];
   return (
     <>
-      <PageHead title="Disputes" sub="Review the proof, hear both sides, and rule before the clock runs out." />
+      {!embedded && <PageHead title="Disputes" sub="Review the proof, hear both sides, and rule before the clock runs out." />}
       <div className="split">
         <section className="card">
           <Tabs tabs={[["open", "Open", open.length], ["done", "Resolved", done.length]]} value={tab} onChange={(t) => { setTab(t); setSelId(null); }} />

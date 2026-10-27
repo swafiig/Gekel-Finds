@@ -1,6 +1,7 @@
-import { AREAS, BUYERS, CATALOG, DEFAULT_CONFIG, HUBS, ME, STATUS, VERIFIED_IDS, calcFee } from "./constants";
+import { AREAS, BUYERS, CATALOG, DEFAULT_CONFIG, HUBS, STATUS, VERIFIED_IDS, calcFee } from "./constants";
+import { createExtra } from "./seed2";
 import { MIN, ago, between, pick, reseed, rnd } from "./rng";
-import type { Db, Dispute, FeePayment, Order, OrderLine, Request, Rider, StatusKey, Supplier, Unmatched } from "./types";
+import type { Db, Dispute, FeePayment, Order, OrderLine, Request, RoleName, Rider, StatusKey, Supplier, Unmatched } from "./types";
 
 type S0 = Omit<Supplier, "x" | "y">;
 const sup0: S0[] = [
@@ -66,7 +67,7 @@ export function makeOrder(db: Pick<Db, "suppliers" | "config">, status: StatusKe
   return o;
 }
 
-export function createDb(): Db {
+export function createDb(user: { id: string; name: string; role: RoleName } = { id: "u0", name: "Rashid Mwangi", role: "Super admin" }): Db {
   reseed(); orderSeq = 10480;
   const suppliers: Supplier[] = sup0.map((s) => { const h = HUBS[s.hub]; return { ...s, x: h.x + between(-55, 55), y: h.y + between(-40, 40) }; });
   const riders: Rider[] = rid0.map((r) => { const h = HUBS[r.hub]; const x = h.x + between(-60, 60), y = h.y + between(-45, 45); return { ...r, x, y, tx: x, ty: y, job: null, earn: r.trips * 310 + between(0, 120) }; });
@@ -137,13 +138,6 @@ export function createDb(): Db {
 
   return {
     orders, suppliers, riders, requests, disputes, unmatched, feeStream, config: base.config,
-    team: [
-      { id: "u1", name: "Rashid Mwangi", email: "rashid@gekel.co", role: "Super admin", last: "Now", mfa: true },
-      { id: "u2", name: "Karanja Maina", email: "karanja@gekel.co", role: "Ops lead", last: "12 min ago", mfa: true },
-      { id: "u3", name: "Wanjiru Kamau", email: "wanjiru@gekel.co", role: "Verifier", last: "2 h ago", mfa: true },
-      { id: "u4", name: "Achieng Odera", email: "achieng@gekel.co", role: "Support", last: "5 min ago", mfa: true },
-      { id: "u5", name: "Farah Hussein", email: "farah@gekel.co", role: "Finance", last: "Yesterday", mfa: false },
-    ],
     audit: [
       { at: ago(6), who: "Karanja Maina", act: "Reassigned rider", tgt: "#GK-10491", d: "Peter Otieno to Fatuma Ali (no response in 45s)" },
       { at: ago(21), who: "Wanjiru Kamau", act: "Marked document verified", tgt: "Safari Boots Ltd", d: "Business permit" },
@@ -156,6 +150,7 @@ export function createDb(): Db {
     ],
     events: ["New request: Cotton bedsheets, 40 pcs", "Star Electronics quoted #RFQ-4091", "Karanja M. reassigned a rider on #GK-10491", "Hodari Shoes confirmed payment for #GK-10480"].map((txt, i) => ({ at: Date.now() - (i + 1) * 90000, txt, kind: "" })),
     hourly: { today: [2, 1, 0, 0, 1, 3, 9, 18, 31, 44, 52, 58, 61, 49, 40, 33, 0, 0, 0, 0, 0, 0, 0, 0], yest: [1, 0, 0, 0, 1, 2, 7, 15, 28, 39, 47, 55, 57, 52, 44, 38, 35, 30, 22, 17, 12, 8, 4, 2] },
-    ui: { hub: "All", role: ME.role, live: true },
+    ui: { hub: "All", role: user.role, live: true, user },
+    ...createExtra({ suppliers, riders, orders }),
   };
 }

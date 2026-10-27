@@ -2,7 +2,7 @@
 import { calcFee } from "./constants";
 import { money } from "./format";
 import { MIN } from "./rng";
-import { assignRider, emit, getDb, log, nearestRider, ord, pushEvent, rid, setStatus, sup } from "./store";
+import { actor, assignRider, emit, getDb, log, nearestRider, ord, pushEvent, rid, setStatus, sup } from "./store";
 import type { Config, Dispute, DocState, Order, RoleName, Supplier } from "./types";
 
 const touch = <T,>(v: T) => { emit(); return v; };
@@ -13,20 +13,20 @@ export function nudgeMany(list: Order[]) { list.forEach((o) => o.log.push({ at: 
 export function assignManual(o: Order, riderId: string) {
   const r = rid(riderId); const old = o.rider ? rid(o.rider) : null;
   if (old) { old.job = null; old.status = "online"; }
-  assignRider(o, r, "Rashid Mwangi"); log(old ? "Reassigned rider" : "Assigned rider", o.code, `${old ? old.name + " to " : ""}${r.name}`); touch(0); return r;
+  assignRider(o, r, actor()); log(old ? "Reassigned rider" : "Assigned rider", o.code, `${old ? old.name + " to " : ""}${r.name}`); touch(0); return r;
 }
 export function autoAssignAll(hubOk: (o: Order) => boolean) {
-  let n = 0; getDb().orders.filter((o) => hubOk(o) && o.status === "ready" && !o.rider).forEach((o) => { const r = nearestRider(o); if (r) { assignRider(o, r, "Rashid Mwangi"); n++; } });
+  let n = 0; getDb().orders.filter((o) => hubOk(o) && o.status === "ready" && !o.rider).forEach((o) => { const r = nearestRider(o); if (r) { assignRider(o, r, actor()); n++; } });
   log("Auto-assigned riders", `${n} orders`, "Nearest free rider"); touch(0); return n;
 }
 export function messageOrder(o: Order, who: "supplier" | "buyer", text: string) { o.log.push({ at: Date.now(), t: `Message to ${who}: "${text}"` }); log("Messaged " + who, o.code, text); touch(0); }
 export function cancelOrder(o: Order, reason: string) {
   const r = o.rider ? rid(o.rider) : null; if (r) { r.job = null; r.status = "online"; }
-  setStatus(o, "cancelled", `Cancelled by Rashid Mwangi: ${reason}`); log("Cancelled order", o.code, reason); touch(0);
+  setStatus(o, "cancelled", `Cancelled by ${actor()}: ${reason}`); log("Cancelled order", o.code, reason); touch(0);
 }
 export function openDispute(o: Order, kind: string) {
   const d = getDb(); const id = "DIS-" + (883 + d.disputes.length);
-  d.disputes.unshift({ id, order: o.id, kind, sev: "med", status: "open", openedBy: "Support", at: Date.now(), sla: Date.now() + 180 * MIN, claim: "Opened by Rashid Mwangi from the order page.", amount: o.itemsTotal, evidence: o.proofs.map((p) => ({ ...p })), chat: [], buyer: o.buyer, sid: o.sid });
+  d.disputes.unshift({ id, order: o.id, kind, sev: "med", status: "open", openedBy: "Support", at: Date.now(), sla: Date.now() + 180 * MIN, claim: `Opened by ${actor()} from the order page.`, amount: o.itemsTotal, evidence: o.proofs.map((p) => ({ ...p })), chat: [], buyer: o.buyer, sid: o.sid });
   o.dispute = id; o.status = "disputed"; o.log.push({ at: Date.now(), t: `Dispute ${id} opened: ${kind}` }); log("Opened dispute", id, `${kind} on ${o.code}`); touch(0); return id;
 }
 
@@ -68,13 +68,13 @@ export function ruleDispute(d: Dispute, k: Ruling, note: string) {
   if (k === "buyer") { const s = sup(d.sid!); s.score = Math.max(0, (s.score ?? 0) - 2); }
   log("Ruled on dispute", d.id, `${title}: ${note}`); pushEvent(`${d.id} resolved: ${title}`, "dis"); touch(0);
 }
-export function replyDispute(d: Dispute, text: string) { d.chat.push(["Support", "Rashid Mwangi", text]); log("Replied on dispute", d.id, text); touch(0); }
+export function replyDispute(d: Dispute, text: string) { d.chat.push(["Support", actor(), text]); log("Replied on dispute", d.id, text); touch(0); }
 
 /* ---------- payments ---------- */
 export function matchPayment(ref: string, orderId: string) {
   const d = getDb(); const u = d.unmatched.find((x) => x.ref === ref)!; const o = ord(orderId)!;
   d.unmatched.splice(d.unmatched.indexOf(u), 1); d.feeStream.unshift({ id: "m" + u.ref, order: o.id, ref: u.ref, amount: u.amount, at: Date.now(), state: "matched", ms: 0 });
-  o.log.push({ at: Date.now(), t: `GEKEL fee ${u.ref} matched by Rashid Mwangi` }); log("Matched payment", u.ref, `To ${o.code}`); touch(0); return o;
+  o.log.push({ at: Date.now(), t: `GEKEL fee ${u.ref} matched by ${actor()}` }); log("Matched payment", u.ref, `To ${o.code}`); touch(0); return o;
 }
 export function refundPayment(ref: string, reason: string) { const d = getDb(); const u = d.unmatched.find((x) => x.ref === ref)!; d.unmatched.splice(d.unmatched.indexOf(u), 1); log("Refunded payment", u.ref, reason); touch(0); }
 
@@ -82,10 +82,6 @@ export function refundPayment(ref: string, reason: string) { const d = getDb(); 
 export const RULE_LABELS: Record<keyof Config, string> = { findFee: "Find fee", baseDelivery: "Base delivery", perKm: "Per kilometre", servicePct: "Service charge", serviceCap: "Service charge cap", riderShare: "Rider share of delivery", offerSecs: "Rider offer timer", radiusKm: "Search radius", maxJobs: "Jobs per rider", quoteWindow: "Quote window", payConfirmSla: "Payment confirmation SLA" };
 export function saveConfig(draft: Config) { const c = getDb().config; (Object.keys(draft) as (keyof Config)[]).forEach((k) => { if (draft[k] !== c[k]) { log("Changed rule", RULE_LABELS[k], `${c[k]} to ${draft[k]}`); c[k] = draft[k]; } }); touch(0); }
 export function feeFor(items: number, km: number, c: Config) { return calcFee(items, km, c); }
-export function inviteMember(email: string, role: RoleName) { const t = getDb().team; t.push({ id: "u" + (t.length + 1), name: email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()), email, role, last: "Invited", mfa: false }); log("Invited team member", email, role); touch(0); }
-export function changeRole(id: string, role: RoleName) { const u = getDb().team.find((x) => x.id === id)!; log("Changed role", u.name, `${u.role} to ${role}`); u.role = role; touch(0); return u; }
-export function removeMember(id: string) { const t = getDb().team; const u = t.find((x) => x.id === id)!; t.splice(t.indexOf(u), 1); log("Removed team member", u.name, u.role); touch(0); return u; }
-
 /* ---------- shell ---------- */
 export function setHub(h: "All" | "Eastleigh" | "Kamukunji") { getDb().ui.hub = h; emit(); }
 export function setRole(r: RoleName) { getDb().ui.role = r; emit(); }

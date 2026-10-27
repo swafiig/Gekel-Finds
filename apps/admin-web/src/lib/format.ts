@@ -4,7 +4,7 @@ export const money = (n: number) => "KSh " + Math.round(n).toLocaleString("en-KE
 export const minsSince = (t: number) => (Date.now() - t) / MIN;
 export function ageTxt(t: number) {
   const m = Math.max(0, Math.floor(minsSince(t)));
-  if (m < 1) return "just now";
+  if (m < 1) return "under 1m";
   if (m < 60) return m + "m";
   const h = Math.floor(m / 60);
   if (h < 24) return h + "h " + (m % 60) + "m";
@@ -16,3 +16,5 @@ export const ageCls = (m: number, warm: number, hot: number) => (m >= hot ? "age
 export const initials = (n: string) => n.split(" ").map((p) => p[0]).slice(0, 2).join("");
 export const dist = (ax: number, ay: number, bx: number, by: number) => Math.hypot(ax - bx, ay - by);
 export const csvCell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+/** "just now", "12m ago", "2h 5m ago". Use this instead of `${ageTxt(t)} ago`. */
+export const agoTxt = (t: number) => ageTxt(t) + " ago";

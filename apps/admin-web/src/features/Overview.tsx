@@ -65,8 +65,14 @@ export function AlertList({ limit = 7 }: { limit?: number }) {
     if (a.act === "nudge") { nudgeSupplier(ord(a.id)!); toast("Reminder sent"); }
     else if (a.act === "broadcast-req") { const { q, n } = broadcastRequest(a.id); toast(`${q.code} pushed to ${n} suppliers`); }
     else if (a.act === "open-order") router.push(`/orders?open=${a.id}`);
-    else if (a.act === "open-dispute") router.push(`/disputes?id=${a.id}`);
+    else if (a.act === "open-dispute") router.push(`/suluhu?id=${a.id}`);
     else if (a.act === "open-rider") router.push(`/riders?open=${a.id}`);
+    else if (a.act === "open-find") router.push(`/find?open=${a.id}`);
+    else if (a.act === "open-errand") router.push(`/errands?open=${a.id}`);
+    else if (a.act === "nudge-quote") router.push("/quotes");
+    else if (a.act === "open-health") router.push("/health");
+    else if (a.act === "open-restock") router.push("/restock");
+    else if (a.act === "open-return") router.push("/suluhu?tab=returns");
     else router.push(`/suppliers?id=${a.id}`);
   };
   if (!L.length) return <Empty title="All clear">Nothing needs a person right now.</Empty>;
@@ -101,8 +107,8 @@ export default function Overview() {
         <div className="nums">
           <div><b className="num">{s.flight}</b><span>Orders in flight</span><Link href="/orders">See orders</Link></div>
           <div><b className="num">{busy}<em>/</em>{online}</b><span>Riders on a job / online</span><Link href="/riders">Open dispatch</Link></div>
-          <div><b className="num">{openReq}</b><span>Requests open</span><Link href="/requests">See requests</Link></div>
-          <div><b className="num">{openDis}</b><span>Disputes open</span><Link href="/disputes">Open desk</Link></div>
+          <div><b className="num">{openReq}</b><span>Requests open</span><Link href="/quotes">See quotes</Link></div>
+          <div><b className="num">{openDis}</b><span>Disputes open</span><Link href="/suluhu">Open desk</Link></div>
         </div>
       </section>
 

@@ -8,12 +8,12 @@ import { ageCls, ageTxt, minsSince, money } from "@/lib/format";
 import { inHub, useDb } from "@/lib/store";
 
 type St = "open" | "matched" | "expired";
-export default function Requests() {
+export default function Requests({ embedded }: { embedded?: boolean }) {
   const db = useDb()!; const { toast, confirm } = useOverlay(); const [st, setSt] = useState<St>("open");
   const R = db.requests.filter(inHub); const rows = R.filter((q) => q.status === st);
   return (
     <>
-      <PageHead title="Requests" sub="What buyers are asking for. Requests with no quote after 8 minutes are flagged on the overview." />
+      {!embedded && <PageHead title="Requests" sub="What buyers are asking for. Requests with no quote after 8 minutes are flagged on the overview." />}
       <section className="card">
         <div className="toolbar"><Chips<St> items={[["open", "Open", R.filter((q) => q.status === "open").length], ["matched", "Matched", R.filter((q) => q.status === "matched").length], ["expired", "Expired", R.filter((q) => q.status === "expired").length]]} value={st} onChange={setSt} /></div>
         {rows.length ? (

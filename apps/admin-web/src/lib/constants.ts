@@ -1,4 +1,4 @@
-import type { Config, HubName, PermKey, RoleName, StatusKey, Tone } from "./types";
+import type { Config, Dept, HubName, PermKey, RoleName, StatusKey, Tone } from "./types";
 
 export const HUBS: Record<HubName, { x: number; y: number; color: string }> = {
   Eastleigh: { x: 470, y: 150, color: "#FA3F0A" },
@@ -33,19 +33,23 @@ export const CATALOG: Record<string, [string, number][]> = {
 export const VERIFIED_IDS = ["s1", "s2", "s3", "s4", "s5", "s6", "s7"];
 export const DEFAULT_CONFIG: Config = { findFee: 100, baseDelivery: 120, perKm: 20, servicePct: 1.5, serviceCap: 300, riderShare: 78, offerSecs: 45, radiusKm: 4, maxJobs: 1, quoteWindow: 90, payConfirmSla: 10 };
 
-export const ROLES: RoleName[] = ["Super admin", "Ops lead", "Support", "Verifier", "Finance"];
+export const ROLES: RoleName[] = ["Super admin", "Ops lead", "Support", "Verifier", "Finance", "Sourcing agent", "Tech"];
+export const DEPTS: Dept[] = ["Management", "Operations", "Sourcing", "Logistics", "Suppliers", "Finance", "Tech", "Support"];
+export const DEPT_ROLE: Record<Dept, RoleName> = { Management: "Super admin", Operations: "Ops lead", Sourcing: "Sourcing agent", Logistics: "Ops lead", Suppliers: "Verifier", Finance: "Finance", Tech: "Tech", Support: "Support" };
 export const PERMS: [PermKey, string][] = [
-  ["orders", "Manage orders and dispatch"], ["suppliers", "Verify and suspend suppliers"], ["riders", "Suspend riders and edit documents"],
-  ["disputes", "Rule on disputes"], ["payments", "Reconcile payments"], ["config", "Edit fees and dispatch rules"], ["team", "Manage team and roles"],
+  ["orders", "Manage orders, dispatch, errands and restocks"], ["sourcing", "Run Find GEKEL and own-supplier jobs"], ["suppliers", "Verify and suspend suppliers"], ["riders", "Suspend riders and edit documents"],
+  ["disputes", "Rule on disputes and returns"], ["payments", "Reconcile payments"], ["comms", "Send notifications and bulk messages"], ["config", "Edit fees, delivery and gift rules"],
+  ["tech", "Edit integrations, maintenance mode and logs"], ["team", "Manage staff and roles"],
 ];
 export const ROLE_PERMS: Record<RoleName, PermKey[]> = {
-  "Super admin": ["orders", "suppliers", "riders", "disputes", "payments", "config", "team"],
-  "Ops lead": ["orders", "suppliers", "riders", "disputes", "payments", "config"],
-  Support: ["orders", "disputes"],
+  "Super admin": ["orders", "sourcing", "suppliers", "riders", "disputes", "payments", "comms", "config", "tech", "team"],
+  "Ops lead": ["orders", "sourcing", "suppliers", "riders", "disputes", "payments", "comms", "config"],
+  Support: ["orders", "disputes", "comms"],
   Verifier: ["suppliers"],
   Finance: ["payments"],
+  "Sourcing agent": ["sourcing", "orders"],
+  Tech: ["tech"],
 };
-export const ME = { name: "Rashid Mwangi", role: "Super admin" as RoleName };
 export const permLabel = (p: PermKey) => PERMS.find((x) => x[0] === p)![1];
 
 export const calcFee = (items: number, km: number, c: Config) => Math.round(c.findFee + c.baseDelivery + c.perKm * km + Math.min(c.serviceCap, (items * c.servicePct) / 100));

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { DialogShell, useOverlay } from "@/components/Overlay";
-import { assignManual, broadcastMessage, changeRole, inviteMember, matchPayment, messageOrder } from "@/lib/actions";
+import { assignManual, broadcastMessage, matchPayment, messageOrder } from "@/lib/actions";
 import { ROLES } from "@/lib/constants";
 import { money } from "@/lib/format";
 import { getDb, inHub, rid, sup } from "@/lib/store";
@@ -72,22 +72,4 @@ export function MatchDialog({ u, close }: { u: Unmatched; close: () => void }) {
   );
 }
 
-export function InviteDialog({ close }: { close: () => void }) {
-  const { toast } = useOverlay(); const [email, setEmail] = useState(""); const [role, setRole] = useState<RoleName>("Support"); const [err, setErr] = useState(false);
-  return (
-    <DialogShell title="Invite a team member" footer={<><button className="btn" onClick={close}>Cancel</button><button className="btn primary" onClick={() => { const e = email.trim(); if (!/^\S+@\S+\.\S+$/.test(e)) { setErr(true); return; } inviteMember(e, role); close(); toast(`Invite sent to ${e}`); }}>Send invite</button></>}>
-      <div className="field"><label htmlFor="ie">Work email</label><input id="ie" className={`input ${err ? "err" : ""}`} type="email" value={email} placeholder="name@gekel.co" onChange={(e) => { setEmail(e.target.value); setErr(false); }} />{err && <span className="errtxt">Enter a valid email address.</span>}</div>
-      <div className="field"><label htmlFor="ir">Role</label><select id="ir" className="input" value={role} onChange={(e) => setRole(e.target.value as RoleName)}>{ROLES.filter((r) => r !== "Super admin").map((r) => <option key={r}>{r}</option>)}</select><span className="hint">You can change this later.</span></div>
-    </DialogShell>
-  );
-}
-
-export function RoleChangeDialog({ id, close }: { id: string; close: () => void }) {
-  const { toast } = useOverlay(); const u = getDb().team.find((x) => x.id === id)!; const [r, setR] = useState<RoleName>(u.role);
-  return (
-    <DialogShell title={`Change role for ${u.name}`} footer={<><button className="btn" onClick={close}>Cancel</button><button className="btn primary" onClick={() => { if (u.id === "u1" && r !== "Super admin") { toast("At least one Super admin is needed", "bad"); return; } changeRole(id, r); close(); toast(`${u.name} is now ${r}`); }}>Save role</button></>}>
-      <div className="field"><label htmlFor="nr">Role</label><select id="nr" className="input" value={r} onChange={(e) => setR(e.target.value as RoleName)}>{ROLES.map((x) => <option key={x}>{x}</option>)}</select></div>
-    </DialogShell>
-  );
-}
 export { inHub, rid };
