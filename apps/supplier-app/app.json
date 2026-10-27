@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "GEKEL Seller",
-    "slug": "gekel-seller",
+    "name": "GEKEL Supplier",
+    "slug": "gekel-supplier",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "co.gekel.seller",
+      "bundleIdentifier": "co.gekel.supplier",
       "infoPlist": {
         "NSCameraUsageDescription": "GEKEL uses the camera for product and packing proof photos.",
         "NSPhotoLibraryUsageDescription": "GEKEL lets you pick product photos from your library."
